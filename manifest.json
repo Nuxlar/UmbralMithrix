@@ -1,0 +1,13 @@
+﻿{
+  "name": "UmbralMithrix",
+  "version_number": "2.1.0",
+  "website_url": "",
+  "description": "BUGS-B-GONE UPDATE. A reworked Mithrix fight",
+  "dependencies": [
+    "Rune580-Risk_Of_Options-2.7.0",
+    "RiskofThunder-R2API_ContentManagement-1.0.2",
+    "RiskofThunder-R2API_Prefab-1.0.3",
+    "RiskofThunder-R2API_Language-1.0.1",
+    "Nuxlar-AltMithrixTheme-1.0.2"
+  ]
+}
