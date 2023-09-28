@@ -4,15 +4,11 @@
 
 **_SUBMIT ANY ISSUES FOUND WITH A LOG TO THE LINK ABOVE_**
 
-Major reworks to the fight, a new trophy item, and 2 new modes, Practice and Bonfire. When you spawn on the moon there'll be 2 shrines to activate either mode or just don't activate them if you want neither. You only need to interact with them once even if you're using LunarApostles. When completing the fight you'll get a trophy item to track your victories against Umbral.
+Major reworks to the fight, a new trophy item, and a practice mode. When you spawn on the moon there'll be a shrine to optionally activate the mode. You only need to interact with it once even if you're using LunarApostles. When completing the fight you'll get a trophy item to track your victories against Umbral.
 
 ### Practice Mode
 
 Practice mode just makes you respawn on death in case you want to learn/practice the fight but don't want to do a whole other run (infinite dio's). The trophy item won't spawn at the end of the fight. The mode deactivates after Mithrix dies in Phase 4.
-
-### Bonfire Mode
-
-Bonfire mode saves your drones, money, inventory, and timer when the fight starts and resets your fight on death. So you'll fight Umbral with the same build/allies until you defeat him. Made in case you want to challenge yourself to defeat Umbral but don't want to start a new run. If you die before starting the fight your run ends. The mode deactivates after Mithrix dies in Phase 4. For Multiplayer the reset occurs when all players are dead.
 
 ### Config Info
 
@@ -28,20 +24,20 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 **2.1.0**
 
+- Removes Bonfire mode
 - Fixes Starstorm/Moonstorm P3 crystal bug
-- Fixes P2 immune threshold not working
-- Fixes Multiplayer issues
-  - Bonfire
-  - P3 crystals
-  - Leap
-  - P4 shockwaves
+- Fixes P2/P3 immune threshold not working
+- Fixes Multiplayer issues (hopefully)
+  - P3 crystals not disappearing
+  - Leap spawning multiple shockwaves and only tracking the host
+  - P4 shockwaves firing multiple times
+  - P3/P4 pizza only tracking the host
 - Balance changes
   - P1 clones spawn less frequently but last longer to make it less chaotic
   - Changes leap from tracking to in-place (jumps and lands in the same spot)
   - P3 drones can be bought back (all drones are still destroyed at the beginning of the phase)
   - P4 Tweaks
     - Kills all allies after items are stolen
-    - Reduces pizza interval 2 -> 1.75 seconds
     - Reduces shockwave interval 6 -> 5.75 seconds
     - Reduces missile interval 3 -> 1 second
     - Reduces pizza damage and force by 50%

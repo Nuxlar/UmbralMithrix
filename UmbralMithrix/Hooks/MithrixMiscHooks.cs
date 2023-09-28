@@ -251,7 +251,6 @@ namespace UmbralMithrix
         Vector3 velocity = Vector3.up * 40f + Vector3.forward * 2f;
         PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(UmbralMithrix.UmbralItem.itemIndex), self.characterBody.footPosition + Vector3.up * 1.5f, velocity);
       }
-      UmbralMithrix.bonfireModeEnabled = false;
       UmbralMithrix.practiceModeEnabled = false;
       orig(self);
     }

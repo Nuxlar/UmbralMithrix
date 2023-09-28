@@ -28,47 +28,6 @@ namespace UmbralMithrix
       UmbralMithrix.finishedItemSteal = false;
       UmbralMithrix.AdjustBaseSkills();
       UmbralMithrix.AdjustBaseStats();
-      GameObject enabled = GameObject.Find("BonfireEnabled");
-      if (enabled)
-      {
-        if (UmbralMithrix.bonfireRunTime == 0.0)
-        {
-          this.SaveAllies();
-          UmbralMithrix.bonfireRunTime = Run.instance.time;
-        }
-        foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
-        {
-          if (cm.teamIndex == TeamIndex.Player)
-          {
-            CharacterBody cb = cm.GetBody();
-            if (cb && cb.isPlayerControlled)
-            {
-              if (!UmbralMithrix.bonfireInventory.ContainsKey(cm) && !UmbralMithrix.persistentBuffs.ContainsKey(cm) && !UmbralMithrix.bonfireGold.ContainsKey(cm))
-              {
-                UmbralMithrix.bonfireGold.Add(cm, cm.money);
-                GameObject gameObject = new GameObject();
-                gameObject.AddComponent<CharacterMaster>();
-                Inventory inventory = gameObject.AddComponent<Inventory>();
-                inventory.AddItemsFrom(cm.inventory, _ => true);
-                inventory.CopyEquipmentFrom(cm.inventory);
-                UmbralMithrix.bonfireInventory.Add(cm, inventory);
-                Dictionary<BuffIndex, int> dictionary = new Dictionary<BuffIndex, int>();
-                int buffCount1 = cb.GetBuffCount(RoR2Content.Buffs.PermanentCurse.buffIndex);
-                if (buffCount1 > 0)
-                  dictionary.Add(RoR2Content.Buffs.PermanentCurse.buffIndex, buffCount1);
-                int buffCount2 = cb.GetBuffCount(RoR2Content.Buffs.BanditSkull.buffIndex);
-                if (buffCount2 > 0)
-                  dictionary.Add(RoR2Content.Buffs.BanditSkull.buffIndex, buffCount2);
-                if (dictionary.Count > 0)
-                {
-                  UmbralMithrix.persistentBuffs[cm] = dictionary;
-                  Debug.Log(string.Format("Saved buffs for player `{0}` : Curse={1}, BanditSkulls={2}", cm.name, buffCount1, buffCount2));
-                }
-              }
-            }
-          }
-        }
-      }
 
       GameObject gameObject1 = GameObject.Find("EscapeSequenceController");
       if ((bool)gameObject1)
@@ -99,12 +58,22 @@ namespace UmbralMithrix
     private void Phase4OnEnter(On.EntityStates.Missions.BrotherEncounter.Phase4.orig_OnEnter orig, Phase4 self)
     {
       UmbralMithrix.AdjustPhase4Stats();
+      GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(UmbralMithrix.voidling, new Vector3(-88.5f, 520f, -0.3f), Quaternion.identity);
+      gameObject.AddComponent<DeathZoneController>();
+      gameObject.GetComponent<TeamComponent>().teamIndex = TeamIndex.Monster;
+      SkillLocator skillLocator = gameObject.GetComponent<CharacterBody>().skillLocator;
+      skillLocator.primary = new GenericSkill();
+      skillLocator.secondary = new GenericSkill();
+      skillLocator.utility = new GenericSkill();
+      skillLocator.special = new GenericSkill();
+      NetworkServer.Spawn(gameObject);
       orig(self);
     }
 
     private void BossDeathOnEnter(On.EntityStates.Missions.BrotherEncounter.BossDeath.orig_OnEnter orig, BossDeath self)
     {
       orig(self);
+      GameObject.Find("InactiveVoidling(Clone)").GetComponent<HealthComponent>().Suicide();
       TeamComponent[] objectsOfType = UnityEngine.Object.FindObjectsOfType<TeamComponent>();
       for (int index = 0; index < objectsOfType.Length; ++index)
       {
@@ -170,29 +139,24 @@ namespace UmbralMithrix
           spawnInfo3
         };
       }
-    }
-
-    private void SaveAllies()
-    {
-      int num = 0;
-      TeamIndex teamIndex = TeamIndex.Player;
-      foreach (CharacterMaster characterMaster in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+      if (PhaseCounter.instance.phase == 4)
       {
-        if (characterMaster.teamIndex == teamIndex)
+        Transform transform = new GameObject()
         {
-          CharacterBody body = characterMaster.GetBody();
-          if ((bool)body && (bool)body.healthComponent && (body.name.Contains("Drone") || body.name.Contains("Turret")))
-          {
-            UmbralMithrix.bonfireAllies.Add(body.name);
-            if (body.name.Contains("EquipmentDrone"))
-              UmbralMithrix.droneEquips.Add(body.inventory.GetEquipmentIndex());
-            ++num;
+          transform = {
+            position = new Vector3(-88.5f, 491.5f, -0.3f),
+            rotation = Quaternion.identity
           }
-        }
+        }.transform;
+        spawnInfo1 = new ScriptedCombatEncounter.SpawnInfo();
+        spawnInfo1.explicitSpawnPosition = transform;
+        spawnInfo1.spawnCard = UmbralMithrix.mithrixHurtCard;
+        ScriptedCombatEncounter.SpawnInfo spawnInfo3 = spawnInfo1;
+        self.phaseScriptedCombatEncounter.spawns = new ScriptedCombatEncounter.SpawnInfo[1]
+        {
+          spawnInfo3
+        };
       }
-      if (num <= 0)
-        return;
-      Debug.Log(string.Format("Added {0} allies.", num));
     }
   }
 }

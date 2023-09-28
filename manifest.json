@@ -2,7 +2,7 @@
   "name": "UmbralMithrix",
   "version_number": "2.1.0",
   "website_url": "https://github.com/FocusedFault/UmbralMithrix/issues",
-  "description": "BUGS-B-GONE UPDATE. A reworked Mithrix fight",
+  "description": "A reworked Mithrix fight",
   "dependencies": [
     "Rune580-Risk_Of_Options-2.7.0",
     "RiskofThunder-R2API_ContentManagement-1.0.2",

@@ -29,7 +29,6 @@ namespace UmbralMithrix
       On.EntityStates.Destructible.TimeCrystalDeath.Explode += TimeCrystalDeath_Explode;
       On.RoR2.BasicPickupDropTable.GenerateWeightedSelection += BasicPickupDropTable_GenerateWeightedSelection;
       On.RoR2.PickupTransmutationManager.RebuildPickupGroups += PickupTransmutationManager_RebuildPickupGroups;
-      // On.EntityStates.EntityState.Update += EntityState_Update;
       On.RoR2.HealthComponent.SendDamageDealt += HealthComponent_SendDamageDealt;
       On.RoR2.Stage.Start += Stage_Start;
       On.RoR2.Run.Start += Run_Start;
@@ -111,58 +110,6 @@ namespace UmbralMithrix
       CharacterBody body)
     {
       orig(self, body);
-      GameObject bonfireContainer = GameObject.Find("BonfireContainer");
-      if (bonfireContainer && body.isPlayerControlled)
-      {
-        BonfireController bonfireController = bonfireContainer.GetComponent<BonfireController>();
-        if (SceneManager.GetActiveScene().name == "moon2" && body.HasBuff(RoR2Content.Buffs.Immune))
-          return;
-        this.SetPosition(new Vector3(UnityEngine.Random.Range(100, 127), 501f, 101f), body);
-        if (UmbralMithrix.bonfireInventory.ContainsKey(self) && UmbralMithrix.bonfireGold.ContainsKey(self))
-        {
-          self.money = UmbralMithrix.bonfireGold[self];
-          body.inventory.itemAcquisitionOrder.Clear();
-          int[] itemStacks = body.inventory.itemStacks;
-          int num = 0;
-          ref int local = ref num;
-          ArrayUtils.SetAll<int>(itemStacks, in local);
-          body.inventory.AddItemsFrom(UmbralMithrix.bonfireInventory[self], (Func<ItemIndex, bool>)(_ => true));
-          body.inventory.CopyEquipmentFrom(UmbralMithrix.bonfireInventory[self]);
-          Dictionary<BuffIndex, int> dictionary;
-          if (UmbralMithrix.persistentBuffs.TryGetValue(body.master, out dictionary))
-          {
-            foreach (KeyValuePair<BuffIndex, int> keyValuePair in dictionary)
-              body.SetBuffCount(keyValuePair.Key, keyValuePair.Value);
-          }
-          if (!bonfireController.spawnedAllies)
-          {
-            foreach (EquipmentIndex droneEquip in UmbralMithrix.droneEquips)
-              new MasterSummon()
-              {
-                masterPrefab = UmbralMithrix.droneMasters["EquipmentDroneBody(Clone)"],
-                position = new Vector3(1079.6f, -283f, 1155f),
-                rotation = Quaternion.identity,
-                summonerBodyObject = body.gameObject,
-                ignoreTeamMemberLimit = true,
-                useAmbientLevel = new bool?(true)
-              }.Perform().inventory.SetEquipmentIndexForSlot(droneEquip, 0U);
-            foreach (string bonfireAlly in UmbralMithrix.bonfireAllies)
-            {
-              if (UmbralMithrix.droneMasters.ContainsKey(bonfireAlly) && !bonfireAlly.Contains("EquipmentDrone"))
-                new MasterSummon()
-                {
-                  masterPrefab = UmbralMithrix.droneMasters[bonfireAlly],
-                  position = new Vector3(1079.6f, -283f, 1155f),
-                  rotation = Quaternion.identity,
-                  summonerBodyObject = PlayerCharacterMasterController.instances[0].body.gameObject,
-                  ignoreTeamMemberLimit = true,
-                  useAmbientLevel = new bool?(true)
-                }.Perform();
-            }
-            bonfireController.spawnedAllies = true;
-          }
-        }
-      }
       if (!(bool)PhaseCounter.instance)
         return;
       if (body.name == "BrotherHurtBodyP3(Clone)")
@@ -208,21 +155,6 @@ namespace UmbralMithrix
         return;
       if (UmbralMithrix.practiceModeEnabled && !self.IsExtraLifePendingServer())
         self.RespawnExtraLife();
-      GameObject bonfireContainer = GameObject.Find("BonfireContainer");
-      if (bonfireContainer)
-      {
-        bonfireContainer.GetComponent<BonfireController>().spawnedAllies = false;
-        bool flag = true;
-        if (this.CountLivingPlayers() != 0 || self.IsExtraLifePendingServer())
-          flag = false;
-        if (!flag || !UmbralMithrix.bonfireInventory.ContainsKey(self))
-          return;
-        Run.instance.SetRunStopwatch(UmbralMithrix.bonfireRunTime);
-        TeamManager.instance.SetTeamLevel(TeamIndex.Monster, 1U);
-        this.KillAllDrones();
-        self.preventGameOver = true;
-        this.SetScene("moon2");
-      }
     }
 
     private void CombatDirector_OnEnable(On.RoR2.CombatDirector.orig_OnEnable orig, CombatDirector self)
@@ -236,7 +168,17 @@ namespace UmbralMithrix
     private void TimeCrystalDeath_Explode(On.EntityStates.Destructible.TimeCrystalDeath.orig_Explode orig, TimeCrystalDeath self)
     {
       if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 3)
+      {
         self.damageStat = 0;
+        int count = UmbralMithrix.timeCrystals.Count;
+        if (count != 1)
+          UmbralMithrix.timeCrystals.RemoveAt(0);
+        else if (count == 1)
+        {
+          UmbralMithrix.timeCrystals.RemoveAt(0);
+          GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
+        }
+      }
       orig(self);
     }
 
@@ -342,15 +284,7 @@ namespace UmbralMithrix
 
     private void Run_Start(On.RoR2.Run.orig_Start orig, Run self)
     {
-      UmbralMithrix.bonfireRunTime = 0.0f;
       UmbralMithrix.practiceModeEnabled = false;
-      UmbralMithrix.bonfireModeEnabled = false;
-      UmbralMithrix.spawnedAllies = false;
-      UmbralMithrix.persistentBuffs.Clear();
-      UmbralMithrix.bonfireInventory.Clear();
-      UmbralMithrix.bonfireGold.Clear();
-      UmbralMithrix.bonfireAllies.Clear();
-      UmbralMithrix.droneEquips.Clear();
       orig(self);
     }
 
@@ -359,16 +293,8 @@ namespace UmbralMithrix
       orig(self);
       if (!(self.sceneDef.cachedName == "moon2"))
         return;
-      if (NetworkServer.active && UmbralMithrix.bonfireModeEnabled)
-      {
-        GameObject bonfireContainer = new("BonfireContainer");
-        bonfireContainer.AddComponent<BonfireController>();
-        bonfireContainer.AddComponent<NetworkIdentity>();
-        NetworkServer.Spawn(bonfireContainer);
-      }
       UmbralMithrix.ArenaSetup();
       UmbralMithrix.SpawnPracticeModeShrine();
-      UmbralMithrix.SpawnBonfireModeShrine();
       UmbralMithrix.mithrix.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(ThroneSpawnState));
     }
 
@@ -379,17 +305,6 @@ namespace UmbralMithrix
     {
       if (self.name == "PracticeModeShrine")
         UmbralMithrix.practiceModeEnabled = true;
-      if (self.name == "BonfireModeShrine")
-      {
-        UmbralMithrix.bonfireModeEnabled = true;
-        if (NetworkServer.active)
-        {
-          GameObject bonfireContainer = new("BonfireContainer");
-          bonfireContainer.AddComponent<BonfireController>();
-          bonfireContainer.AddComponent<NetworkIdentity>();
-          NetworkServer.Spawn(bonfireContainer);
-        }
-      }
       orig(self, activator);
     }
 
@@ -432,23 +347,6 @@ namespace UmbralMithrix
         }
       }
       orig(self, buffDef, duration);
-    }
-
-    private void EntityState_Update(On.EntityStates.EntityState.orig_Update orig, EntityState self)
-    {
-      orig(self);
-      if (!(bool)self.characterBody || !(bool)PhaseCounter.instance)
-        return;
-
-      if (self.characterBody.name == "InactiveVoidling(Clone)" && PhaseCounter.instance.phase == 4)
-      {
-        UmbralMithrix.elapsedStorm += Time.deltaTime;
-        if (UmbralMithrix.elapsedStorm >= 1.0 && (double)self.gameObject.GetComponent<SphereZone>().Networkradius > 100.0)
-        {
-          UmbralMithrix.elapsedStorm %= 1f;
-          self.gameObject.GetComponent<SphereZone>().Networkradius -= 6f;
-        }
-      }
     }
 
     private void SetPosition(Vector3 newPosition, CharacterBody body)

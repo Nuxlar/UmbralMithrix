@@ -25,64 +25,12 @@ namespace UmbralMithrix
   public class UmbralMithrix : BaseUnityPlugin
   {
     public static bool practiceModeEnabled;
-    public static bool bonfireModeEnabled;
     public static bool hasfired;
-    public static float elapsed = 0.0f;
-    public static float elapsedShockwave = 0.0f;
-    public static float elapsedPizzaPattern = 0.0f;
-    public static float elapsedMissile = 0.0f;
-    public static float elapsedStorm = 0.0f;
-    public static float bonfireRunTime = 0.0f;
-    public static bool spawnedAllies = false;
     public static bool spawnedClone = false;
     public static bool finishedItemSteal = false;
     public static bool p2ThresholdReached = false;
     public static bool p3ThresholdReached = false;
     public static List<GameObject> timeCrystals = new List<GameObject>();
-    public static Dictionary<string, GameObject> droneMasters = new Dictionary<string, GameObject>()
-    {
-      {
-        "Turret1Body(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/Turret1Master.prefab").WaitForCompletion()
-      },
-      {
-        "Drone1Body(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/Drone1Master.prefab").WaitForCompletion()
-      },
-      {
-        "Drone2Body(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/Drone2Master.prefab").WaitForCompletion()
-      },
-      {
-        "MegaDroneBody(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/MegaDroneMaster.prefab").WaitForCompletion()
-      },
-      {
-        "DroneCommanderBody(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/DLC1/DroneCommander/DroneCommanderMaster.prefab").WaitForCompletion()
-      },
-      {
-        "EmergencyDroneBody(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/EmergencyDroneMaster.prefab").WaitForCompletion()
-      },
-      {
-        "MissileDroneBody(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/DroneMissileMaster.prefab").WaitForCompletion()
-      },
-      {
-        "FlameDroneBody(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/FlameDroneMaster.prefab").WaitForCompletion()
-      },
-      {
-        "EquipmentDroneBody(Clone)",
-        Addressables.LoadAssetAsync<GameObject>( "RoR2/Base/Drones/EquipmentDroneMaster.prefab").WaitForCompletion()
-      }
-    };
-    public static List<string> bonfireAllies = new List<string>();
-    public static List<EquipmentIndex> droneEquips = new List<EquipmentIndex>();
-    public static Dictionary<CharacterMaster, Inventory> bonfireInventory = new Dictionary<CharacterMaster, Inventory>();
-    public static Dictionary<CharacterMaster, uint> bonfireGold = new Dictionary<CharacterMaster, uint>();
-    public static Dictionary<CharacterMaster, Dictionary<BuffIndex, int>> persistentBuffs = new Dictionary<CharacterMaster, Dictionary<BuffIndex, int>>();
     public static Dictionary<int, Vector3> p23PizzaPoints = new Dictionary<int, Vector3>()
     {
       {
@@ -151,7 +99,6 @@ namespace UmbralMithrix
     public static MeteorStormController meteorStormController = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Meteor/MeteorStorm.prefab").WaitForCompletion().GetComponent<MeteorStormController>();
     public static SpawnCard mithrixHurtP3Card = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     public static GameObject youngTeleporter = Addressables.LoadAssetAsync<GameObject>("RoR2/Junk/YoungTeleporter.prefab").WaitForCompletion();
-    public static Transform bonfire = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/snowyforest/SFFirepit.prefab").WaitForCompletion(), "Bonfire").transform.GetChild(3);
     public static Transform practiceFire = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/bazaar/BazaarLight1Large Variant.prefab").WaitForCompletion(), "PracticeFire").transform.GetChild(0);
     public static GameObject implodeEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Vagrant/VagrantNovaExplosion.prefab").WaitForCompletion();
     public static GameObject tether = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/EliteEarth/AffixEarthTetherVFX.prefab").WaitForCompletion();
@@ -192,25 +139,18 @@ namespace UmbralMithrix
 
     private void P4DeathOrbSetup()
     {
+      UmbralMithrix.voidling.transform.GetChild(0).gameObject.SetActive(false);
       List<Material> materials = new List<Material>()
       {
-        preBossMat,
-        arenaWallMat,
-        stealAuraMat
+        UmbralMithrix.preBossMat,
+        UmbralMithrix.arenaWallMat,
+        UmbralMithrix.stealAuraMat
       };
-      FogDamageController fog = mithrixHurt.AddComponent<FogDamageController>();
-      TeamFilter filter = new TeamFilter { teamIndex = TeamIndex.Monster };
-      fog.healthFractionPerSecond = 0.01f;
-      fog.dangerBuffDuration = 0.5f;
-      fog.tickPeriodSeconds = 0.5f;
-      fog.teamFilter = filter;
-      fog.healthFractionRampCoefficientPerSecond = 2.5f;
-      fog.dangerBuffDef = fogNotify;
-      GameObject visibleZone = Instantiate(voidling.transform.GetChild(1).GetChild(0).gameObject, mithrixHurt.transform);
-      visibleZone.GetComponent<MeshRenderer>().SetMaterials(materials);
-      SphereZone zone = mithrixHurt.AddComponent<SphereZone>();
-      zone.radius = 275f;
-      fog.initialSafeZones = new BaseZoneBehavior[] { zone };
+      UmbralMithrix.voidling.transform.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().SetMaterials(materials);
+      UmbralMithrix.voidling.GetComponent<SphereZone>().radius = 275f;
+      FogDamageController component = UmbralMithrix.voidling.GetComponent<FogDamageController>();
+      component.healthFractionPerSecond = 0.01f;
+      component.healthFractionRampCoefficientPerSecond = 2.5f;
     }
 
     private void MiscSetup()
@@ -249,19 +189,6 @@ namespace UmbralMithrix
       gameObject1.name = "PracticeModeShrine";
       gameObject2.transform.parent = gameObject1.transform;
       gameObject1.transform.GetChild(1).localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-      NetworkServer.Spawn(gameObject1);
-    }
-
-    public static void SpawnBonfireModeShrine()
-    {
-      GameObject gameObject1 = Instantiate(youngTeleporter, new Vector3(1063f, -283.1f, 1164.4f), Quaternion.identity);
-      GameObject gameObject2 = Instantiate(bonfire.gameObject, new Vector3(1063f, -283.1f, 1164.4f), Quaternion.identity);
-      gameObject2.transform.localScale = new Vector3(4f, 4f, 4f);
-      gameObject1.GetComponent<PurchaseInteraction>().NetworkcontextToken = "Enable Bonfire Mode? (reset on death)";
-      gameObject1.name = "BonfireModeShrine";
-      gameObject1.transform.eulerAngles = new Vector3(0.0f, 66f, 0.0f);
-      gameObject2.transform.parent = gameObject1.transform;
-      gameObject1.transform.GetChild(1).localPosition = new Vector3(-6.35f, 6f, 3.5f);
       NetworkServer.Spawn(gameObject1);
     }
 
