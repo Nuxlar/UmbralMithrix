@@ -121,6 +121,18 @@ namespace UmbralMithrix
 
       if (!NetworkServer.active || self.phaseScriptedCombatEncounter == null || !(bool)PhaseCounter.instance)
         return;
+      self.childLocator = self.GetComponent<ChildLocator>();
+      Transform child1 = self.childLocator.FindChild("ArenaWalls");
+      Material material = Addressables.LoadAssetAsync<Material>((object)"RoR2/Base/InvadingDoppelganger/matDoppelganger.mat").WaitForCompletion();
+      if ((bool)child1)
+      {
+        child1.gameObject.SetActive(self.shouldEnableArenaWalls);
+        foreach (Renderer componentsInChild in child1.GetComponentsInChildren<Renderer>())
+          componentsInChild.material = material;
+      }
+      Debug.LogWarning(self.phaseBossGroup.bestObservedSubtitle);
+      self.phaseBossGroup.bestObservedName = "Umbral Mithrix";
+      self.phaseBossGroup.bestObservedSubtitle = "The Collective";
       ScriptedCombatEncounter.SpawnInfo spawnInfo1;
       if (PhaseCounter.instance.phase == 2)
       {

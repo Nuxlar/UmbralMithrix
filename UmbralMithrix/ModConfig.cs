@@ -58,7 +58,7 @@ namespace UmbralMithrix
       ModConfig.SecCD = config.Bind<float>("Skills", "Secondary Cooldown", 4.5f, "Cooldown for Mithrix's Dash Attack. Vanilla: 5");
       ModConfig.UtilCD = config.Bind<float>("Skills", "Util Cooldown", 2.5f, "Cooldown for Mithrix's Dash. Vanilla: 3");
       ModConfig.SpecialCD = config.Bind<float>("Skills", "Special Cooldown", 30f, "Cooldown for Mithrix's Jump Attack. Vanilla: 30");
-      ModConfig.CrushingLeap = config.Bind<float>("Skill Mods", "Crushing Leap", 3f, "How long Mithrix stays in the air during the crushing leap. Vanilla: N/A");
+      ModConfig.CrushingLeap = config.Bind<float>("Skill Mods", "Crushing Leap", 2f, "How long Mithrix stays in the air during the crushing leap. Vanilla: N/A");
       ModConfig.SlamOrbProjectileCount = config.Bind<int>("Skill Mods", "Orb Projectile Count", 3, "Orbs fired by weapon slam in a circle. Vanilla: N/A");
       ModConfig.LunarShardAdd = config.Bind<int>("Skill Mods", "Shard Add Count", 1, "Bonus shards added to each shot of lunar shards. Vanilla: N/A");
       ModConfig.UltimateWaves = config.Bind<int>("Skill Mods", "P3 Ult Lines", 8, "Total lines in ultimate per burst. Vanilla: 4");

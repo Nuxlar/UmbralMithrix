@@ -122,6 +122,8 @@ namespace UmbralMithrix
       }
     };
     public static ItemDef UmbralItem;
+    public static GameObject leapIndicatorPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Vagrant/VagrantNovaAreaIndicator.prefab").WaitForCompletion();
+    public static GameObject leapIndicator;
     public static SpawnCard timeCrystalCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/WeeklyRun/bscTimeCrystal.asset").WaitForCompletion();
     public static GameObject mithrixMaster = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherMaster.prefab").WaitForCompletion();
     public static GameObject lunarMissile = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/LunarMissileProjectile.prefab").WaitForCompletion();
@@ -358,8 +360,6 @@ namespace UmbralMithrix
     public static void AdjustPhase4Stats()
     {
       CharacterBody component = mithrixHurt.GetComponent<CharacterBody>();
-      component.baseMoveSpeed = 0.0f;
-      component.levelMoveSpeed = 0.0f;
       component.baseDamage = ModConfig.basedamage.Value;
       component.levelDamage = ModConfig.leveldamage.Value;
       component.GetComponent<SkillLocator>().primary = new GenericSkill();

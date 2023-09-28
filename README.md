@@ -1,5 +1,9 @@
 # Umbral Mithrix
 
+**CHECK OUT THE SONG MOD MADE FOR THE FIGHT! [AltMithrixTheme](https://thunderstore.io/package/Nuxlar/AltMithrixTheme/) (works without umbral)**
+
+**_SUBMIT ANY ISSUES FOUND WITH A LOG TO THE LINK ABOVE_**
+
 Major reworks to the fight, a new trophy item, and 2 new modes, Practice and Bonfire. When you spawn on the moon there'll be 2 shrines to activate either mode or just don't activate them if you want neither. You only need to interact with them once even if you're using LunarApostles. When completing the fight you'll get a trophy item to track your victories against Umbral.
 
 ### Practice Mode
@@ -24,20 +28,22 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 **2.1.0**
 
-- Added new song [AltMithrixTheme](https://thunderstore.io/package/Nuxlar/AltMithrixTheme/) DONE
-- Fixes Starstorm/Moonstorm P3 crystal bug DONE
-- Fixes P2 immune threshold not working DONE
+- Fixes Starstorm/Moonstorm P3 crystal bug
+- Fixes P2 immune threshold not working
 - Fixes Multiplayer issues
-  - Bonfire DONE
-  - P3 crystals DONE
+  - Bonfire
+  - P3 crystals
   - Leap
-  - P4 shockwaves DONE
+  - P4 shockwaves
 - Balance changes
   - P1 clones spawn less frequently but last longer to make it less chaotic
   - Changes leap from tracking to in-place (jumps and lands in the same spot)
   - P3 drones can be bought back (all drones are still destroyed at the beginning of the phase)
   - P4 Tweaks
-    - Increased pizza interval from 2 -> 2.5 seconds
+    - Kills all allies after items are stolen
+    - Reduces pizza interval 2 -> 1.75 seconds
+    - Reduces shockwave interval 6 -> 5.75 seconds
+    - Reduces missile interval 3 -> 1 second
     - Reduces pizza damage and force by 50%
     - Reduces shockwave force by 50%
   - Retalitory super shards are now chance based

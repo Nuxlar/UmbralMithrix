@@ -3,6 +3,8 @@ using EntityStates.BrotherMonster;
 using EntityStates.BrotherMonster.Weapon;
 using EntityStates.Destructible;
 using HG;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 using RoR2;
 using RoR2.Networking;
 using RoR2.Projectile;
@@ -19,6 +21,8 @@ namespace UmbralMithrix
   {
     public MiscHooks()
     {
+      IL.RoR2.CharacterBody.UpdateAllTemporaryVisualEffects += AddUmbralParticles;
+      IL.RoR2.CharacterModel.UpdateOverlays += AddUmbralOverlay;
       On.RoR2.CharacterMaster.OnBodyDeath += CharacterMaster_OnBodyDeath;
       On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
       On.RoR2.CombatDirector.OnEnable += CombatDirector_OnEnable;
@@ -26,7 +30,7 @@ namespace UmbralMithrix
       On.RoR2.BasicPickupDropTable.GenerateWeightedSelection += BasicPickupDropTable_GenerateWeightedSelection;
       On.RoR2.PickupTransmutationManager.RebuildPickupGroups += PickupTransmutationManager_RebuildPickupGroups;
       // On.EntityStates.EntityState.Update += EntityState_Update;
-      On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
+      On.RoR2.HealthComponent.SendDamageDealt += HealthComponent_SendDamageDealt;
       On.RoR2.Stage.Start += Stage_Start;
       On.RoR2.Run.Start += Run_Start;
       On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
@@ -35,30 +39,70 @@ namespace UmbralMithrix
       On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
     }
 
-    private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
+    private void AddUmbralParticles(ILContext il)
     {
-      if (self.body && self.body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 2 && !UmbralMithrix.p2ThresholdReached)
+      ILCursor c = new ILCursor(il);
+      c.GotoNext(
+           x => x.MatchLdsfld(typeof(RoR2Content.Items), "InvadingDoppelganger")
+          );
+      c.Index += 2;
+      c.Emit(OpCodes.Ldarg_0);
+      c.EmitDelegate<Func<int, CharacterBody, int>>((vengeanceCount, self) =>
       {
-        if (self.health - damageInfo.damage <= self.fullHealth * 0.75f)
+        if (self.name.Contains("Brother") && self.inventory && self.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0)
+          vengeanceCount++;
+        return vengeanceCount;
+      });
+    }
+
+    private void AddUmbralOverlay(ILContext il)
+    {
+      ILCursor c = new ILCursor(il);
+      c.GotoNext(
+           x => x.MatchLdsfld(typeof(RoR2Content.Items), "InvadingDoppelganger")
+          );
+      c.Index += 2;
+      c.Emit(OpCodes.Ldarg_0);
+      c.EmitDelegate<Func<int, CharacterModel, int>>((vengeanceCount, self) =>
+      {
+        if (self.body.name.Contains("Brother") && self.body.inventory && self.body.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0)
+          vengeanceCount++;
+        return vengeanceCount;
+      });
+    }
+
+    private void HealthComponent_SendDamageDealt(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
+    {
+      DamageInfo damageInfo = damageReport.damageInfo;
+      CharacterBody body = damageReport.victimBody;
+      HealthComponent hc = damageReport.victimBody.healthComponent;
+      if (body && hc && body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 2 && !UmbralMithrix.p2ThresholdReached)
+      {
+        Debug.LogWarning(hc.fullHealth);
+        Debug.LogWarning(damageReport.damageDealt);
+        Debug.LogWarning(hc.fullHealth * 0.75f);
+        if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
         {
           UmbralMithrix.p2ThresholdReached = true;
-          this.P2ThresholdEvent(self.body.gameObject);
-          self.body.AddBuff(RoR2Content.Buffs.Immune);
+          this.P2ThresholdEvent(body.gameObject);
+          hc.health = hc.fullHealth * 0.75f;
+          damageReport.damageInfo.rejected = true;
+          body.AddBuff(RoR2Content.Buffs.Immune);
         }
       }
-      if (self.body && self.body.name == "BrotherHurtBodyP3(Clone)" && PhaseCounter.instance.phase == 3 && !UmbralMithrix.p3ThresholdReached)
+      if (body && hc && body.name == "BrotherHurtBodyP3(Clone)" && PhaseCounter.instance.phase == 3 && !UmbralMithrix.p3ThresholdReached)
       {
-        if (self.health - damageInfo.damage <= self.fullHealth * 0.75f)
+        if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
         {
           UmbralMithrix.p3ThresholdReached = true;
           GameObject.Find("BrotherBody(Clone)").GetComponent<HealthComponent>().health = 1f;
-          this.P3ThresholdEvent(self.body.gameObject);
-          self.health = self.fullHealth * 0.75f;
-          damageInfo.rejected = true;
-          self.body.AddBuff(RoR2Content.Buffs.Immune);
+          this.P3ThresholdEvent(body.gameObject);
+          hc.health = hc.fullHealth * 0.75f;
+          damageReport.damageInfo.rejected = true;
+          body.AddBuff(RoR2Content.Buffs.Immune);
         }
       }
-      orig(self, damageInfo);
+      orig(damageReport);
     }
 
     private void CharacterMaster_OnBodyStart(
@@ -68,10 +112,10 @@ namespace UmbralMithrix
     {
       orig(self, body);
       GameObject bonfireContainer = GameObject.Find("BonfireContainer");
-      if (bonfireContainer)
+      if (bonfireContainer && body.isPlayerControlled)
       {
         BonfireController bonfireController = bonfireContainer.GetComponent<BonfireController>();
-        if (body.isPlayerControlled && SceneManager.GetActiveScene().name == "moon2" && body.HasBuff(RoR2Content.Buffs.Immune))
+        if (SceneManager.GetActiveScene().name == "moon2" && body.HasBuff(RoR2Content.Buffs.Immune))
           return;
         this.SetPosition(new Vector3(UnityEngine.Random.Range(100, 127), 501f, 101f), body);
         if (UmbralMithrix.bonfireInventory.ContainsKey(self) && UmbralMithrix.bonfireGold.ContainsKey(self))
@@ -135,9 +179,20 @@ namespace UmbralMithrix
       if (body.name == "BrotherBody(Clone)" || body.name == "BrotherGlassBody(Clone)")
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
       if (body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 1)
-        self.gameObject.AddComponent<CloneController>();
+      {
+        body.gameObject.AddComponent<CloneController>();
+        ChildLocator component = SceneInfo.instance.GetComponent<ChildLocator>();
+        if (!(bool)component)
+          return;
+        Transform child = component.FindChild("CenterOfArena");
+        if ((bool)child)
+          GameObject.Destroy(child.gameObject);
+      }
       if (!(body.name == "BrotherHurtBody(Clone)") || PhaseCounter.instance.phase != 4)
         return;
+      body.levelMoveSpeed = 0;
+      body.baseMoveSpeed = 0;
+      body.gameObject.AddComponent<P4Controller>();
       body.inventory.GiveItem(UmbralMithrix.UmbralItem);
       body.AddBuff(RoR2Content.Buffs.Immune);
       body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
@@ -160,7 +215,7 @@ namespace UmbralMithrix
         bool flag = true;
         if (this.CountLivingPlayers() != 0 || self.IsExtraLifePendingServer())
           flag = false;
-        if (!flag || !UmbralMithrix.bonfireInventory.ContainsKey(self) && UmbralMithrix.bonfireAllies.Count <= 0)
+        if (!flag || !UmbralMithrix.bonfireInventory.ContainsKey(self))
           return;
         Run.instance.SetRunStopwatch(UmbralMithrix.bonfireRunTime);
         TeamManager.instance.SetTeamLevel(TeamIndex.Monster, 1U);
@@ -308,6 +363,7 @@ namespace UmbralMithrix
       {
         GameObject bonfireContainer = new("BonfireContainer");
         bonfireContainer.AddComponent<BonfireController>();
+        bonfireContainer.AddComponent<NetworkIdentity>();
         NetworkServer.Spawn(bonfireContainer);
       }
       UmbralMithrix.ArenaSetup();
@@ -330,6 +386,7 @@ namespace UmbralMithrix
         {
           GameObject bonfireContainer = new("BonfireContainer");
           bonfireContainer.AddComponent<BonfireController>();
+          bonfireContainer.AddComponent<NetworkIdentity>();
           NetworkServer.Spawn(bonfireContainer);
         }
       }

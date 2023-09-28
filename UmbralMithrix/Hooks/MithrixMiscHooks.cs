@@ -14,6 +14,7 @@ namespace UmbralMithrix
   {
     public MithrixMiscHooks()
     {
+      On.EntityStates.BrotherMonster.EnterSkyLeap.OnEnter += EnterSkyLeap_OnEnter;
       On.EntityStates.BrotherMonster.SprintBash.OnEnter += SprintBash_OnEnter;
       On.EntityStates.BrotherMonster.SprintBash.OnExit += SprintBash_OnExit;
       On.EntityStates.BrotherMonster.FistSlam.OnEnter += FistSlam_OnEnter;
@@ -27,9 +28,22 @@ namespace UmbralMithrix
       On.EntityStates.BrotherMonster.TrueDeathState.OnEnter += TrueDeathState_OnEnter;
     }
 
+    private void EnterSkyLeap_OnEnter(On.EntityStates.BrotherMonster.EnterSkyLeap.orig_OnEnter orig, EnterSkyLeap self)
+    {
+      EnterSkyLeap.baseDuration = 0.25f;
+      HoldSkyLeap.duration = ModConfig.CrushingLeap.Value;
+      orig(self);
+      UmbralMithrix.leapIndicator = GameObject.Instantiate(UmbralMithrix.leapIndicatorPrefab, self.characterBody.footPosition, Quaternion.identity);
+      float radius = self.characterBody.radius / 2;
+      UmbralMithrix.leapIndicator.transform.localScale = new Vector3(radius, radius, radius);
+      NetworkServer.Spawn(UmbralMithrix.leapIndicatorPrefab);
+    }
+
     private void ExitSkyLeap_OnEnter(On.EntityStates.BrotherMonster.ExitSkyLeap.orig_OnEnter orig, ExitSkyLeap self)
     {
       orig(self);
+      if ((bool)UmbralMithrix.leapIndicator)
+        EntityState.Destroy(UmbralMithrix.leapIndicator);
       if (!(bool)PhaseCounter.instance || PhaseCounter.instance.phase != 2)
         return;
       GenericSkill genericSkill = (bool)self.skillLocator ? self.skillLocator.special : null;
@@ -182,6 +196,23 @@ namespace UmbralMithrix
     {
       UmbralMithrix.finishedItemSteal = true;
       self.characterBody.gameObject.GetComponent<P4Controller>().finishedItemSteal = true;
+      bool killedAllies = false;
+      foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+      {
+        if (cm.teamIndex == TeamIndex.Player)
+        {
+          CharacterBody cb = cm.GetBody();
+          if (cb && !cb.isPlayerControlled && cb.healthComponent)
+          { cb.healthComponent.Suicide(); }
+        }
+      }
+      if (killedAllies)
+      {
+        Chat.SendBroadcastChat(new Chat.SimpleChatMessage()
+        {
+          baseToken = "<color=#c6d5ff><size=120%>Mithrix: Perish.</color></size>"
+        });
+      }
       orig(self);
     }
 

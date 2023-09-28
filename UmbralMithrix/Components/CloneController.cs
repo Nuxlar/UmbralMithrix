@@ -10,7 +10,7 @@ namespace UmbralMithrix
     private List<CharacterBody> playerBodies = new();
     private SpawnCard cloneCard = UmbralMithrix.mithrixGlassCard;
     private float stopwatch = 0f;
-    private float interval = 10f;
+    private float interval = 8f;
 
     private void Start()
     {
