@@ -22,7 +22,7 @@ namespace UmbralMithrix
         return;
       this.stopwatch %= this.interval;
       if ((double)this.zone.Networkradius > zoneRadius)
-        this.zone.Networkradius -= 6f;
+        this.zone.Networkradius -= 10f;
     }
 
   }

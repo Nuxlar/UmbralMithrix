@@ -5,6 +5,7 @@ using EntityStates.LunarWisp;
 using RoR2;
 using RoR2.Projectile;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -15,11 +16,12 @@ namespace UmbralMithrix
     public MithrixMiscHooks()
     {
       On.EntityStates.BrotherMonster.EnterSkyLeap.OnEnter += EnterSkyLeap_OnEnter;
+      On.EntityStates.BrotherMonster.HoldSkyLeap.OnEnter += HoldSkyLeap_OnEnter;
+      On.EntityStates.BrotherMonster.ExitSkyLeap.OnEnter += ExitSkyLeap_OnEnter;
       On.EntityStates.BrotherMonster.SprintBash.OnEnter += SprintBash_OnEnter;
       On.EntityStates.BrotherMonster.SprintBash.OnExit += SprintBash_OnExit;
       On.EntityStates.BrotherMonster.FistSlam.OnEnter += FistSlam_OnEnter;
       On.EntityStates.BrotherMonster.UltChannelState.FireWave += UltChannelState_FireWave;
-      On.EntityStates.BrotherMonster.ExitSkyLeap.OnEnter += ExitSkyLeap_OnEnter;
       On.EntityStates.BrotherMonster.SkyLeapDeathState.OnEnter += SkyLeapDeathState_OnEnter;
       On.EntityStates.BrotherMonster.SpellChannelEnterState.OnEnter += SpellChannelEnterState_OnEnter;
       On.EntityStates.BrotherMonster.SpellChannelState.OnEnter += SpellChannelState_OnEnter;
@@ -31,8 +33,32 @@ namespace UmbralMithrix
     private void EnterSkyLeap_OnEnter(On.EntityStates.BrotherMonster.EnterSkyLeap.orig_OnEnter orig, EnterSkyLeap self)
     {
       EnterSkyLeap.baseDuration = 0.25f;
+      orig(self);
+    }
+
+    private void HoldSkyLeap_OnEnter(On.EntityStates.BrotherMonster.HoldSkyLeap.orig_OnEnter orig, HoldSkyLeap self)
+    {
       HoldSkyLeap.duration = ModConfig.CrushingLeap.Value;
       orig(self);
+      List<CharacterBody> playerBodies = new();
+      foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+      {
+        if (cm.teamIndex == TeamIndex.Player)
+        {
+          CharacterBody cb = cm.GetBody();
+          if (cb && cb.isPlayerControlled)
+            playerBodies.Add(cb);
+        }
+      }
+      if (playerBodies.Count > 0)
+      {
+        Vector3 target = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].footPosition;
+        RaycastHit hitInfo;
+        if (Physics.Raycast(new Ray(target, Vector3.down), out hitInfo, 200f, (int)LayerIndex.world.mask, QueryTriggerInteraction.Ignore))
+          self.characterMotor.Motor.SetPositionAndRotation(hitInfo.point + new Vector3(0, 4, 0), Quaternion.identity);
+        else
+          self.characterMotor.Motor.SetPositionAndRotation(target, Quaternion.identity);
+      }
       UmbralMithrix.leapIndicator = GameObject.Instantiate(UmbralMithrix.leapIndicatorPrefab, self.characterBody.footPosition, Quaternion.identity);
       float radius = self.characterBody.radius / 2;
       UmbralMithrix.leapIndicator.transform.localScale = new Vector3(radius, radius, radius);

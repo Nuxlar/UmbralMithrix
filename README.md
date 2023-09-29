@@ -22,6 +22,11 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.1.1**
+
+- Adds semi-tracking leap (jumps to a random player position)
+- Tweaks P4 intervals
+
 **2.1.0**
 
 - Removes Bonfire mode
