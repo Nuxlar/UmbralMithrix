@@ -25,7 +25,11 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 **2.1.1**
 
 - Adds semi-tracking leap (jumps to a random player position)
-- Tweaks P4 intervals
+- Fixes P4 intervals being way too slow
+- Fixes P2 immunity threshold still being bypassed
+- Fixes boss subtitle not having the 2 clouds
+- Reduces P1 clone duration 12 -> 6 secs
+- Adds sound cue to leap
 
 **2.1.0**
 

@@ -72,14 +72,10 @@ namespace UmbralMithrix
 
     private void HealthComponent_SendDamageDealt(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
     {
-      DamageInfo damageInfo = damageReport.damageInfo;
       CharacterBody body = damageReport.victimBody;
       HealthComponent hc = damageReport.victimBody.healthComponent;
       if (body && hc && body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 2 && !UmbralMithrix.p2ThresholdReached)
       {
-        Debug.LogWarning(hc.fullHealth);
-        Debug.LogWarning(damageReport.damageDealt);
-        Debug.LogWarning(hc.fullHealth * 0.75f);
         if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
         {
           UmbralMithrix.p2ThresholdReached = true;

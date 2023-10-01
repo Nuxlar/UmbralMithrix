@@ -40,7 +40,7 @@ namespace UmbralMithrix
       DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(cloneCard, placementRule, rng)
       {
         summonerBodyObject = this.gameObject,
-        onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult => spawnResult.spawnedInstance.GetComponent<Inventory>().GiveItem(RoR2Content.Items.HealthDecay, 12))
+        onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult => spawnResult.spawnedInstance.GetComponent<Inventory>().GiveItem(RoR2Content.Items.HealthDecay, 6))
       });
     }
 

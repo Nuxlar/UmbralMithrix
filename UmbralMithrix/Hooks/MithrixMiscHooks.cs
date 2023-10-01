@@ -33,13 +33,13 @@ namespace UmbralMithrix
     private void EnterSkyLeap_OnEnter(On.EntityStates.BrotherMonster.EnterSkyLeap.orig_OnEnter orig, EnterSkyLeap self)
     {
       EnterSkyLeap.baseDuration = 0.25f;
+      Util.PlaySound("Play_voidRaid_snipe_shoot_final", self.characterBody.gameObject);
       orig(self);
     }
 
     private void HoldSkyLeap_OnEnter(On.EntityStates.BrotherMonster.HoldSkyLeap.orig_OnEnter orig, HoldSkyLeap self)
     {
       HoldSkyLeap.duration = ModConfig.CrushingLeap.Value;
-      orig(self);
       List<CharacterBody> playerBodies = new();
       foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
       {
@@ -55,7 +55,7 @@ namespace UmbralMithrix
         Vector3 target = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].footPosition;
         RaycastHit hitInfo;
         if (Physics.Raycast(new Ray(target, Vector3.down), out hitInfo, 200f, (int)LayerIndex.world.mask, QueryTriggerInteraction.Ignore))
-          self.characterMotor.Motor.SetPositionAndRotation(hitInfo.point + new Vector3(0, 4, 0), Quaternion.identity);
+          self.characterMotor.Motor.SetPositionAndRotation(hitInfo.point + new Vector3(0, 10, 0), Quaternion.identity);
         else
           self.characterMotor.Motor.SetPositionAndRotation(target, Quaternion.identity);
       }
@@ -63,6 +63,7 @@ namespace UmbralMithrix
       float radius = self.characterBody.radius / 2;
       UmbralMithrix.leapIndicator.transform.localScale = new Vector3(radius, radius, radius);
       NetworkServer.Spawn(UmbralMithrix.leapIndicatorPrefab);
+      orig(self);
     }
 
     private void ExitSkyLeap_OnEnter(On.EntityStates.BrotherMonster.ExitSkyLeap.orig_OnEnter orig, ExitSkyLeap self)
@@ -138,7 +139,7 @@ namespace UmbralMithrix
       if (self.characterBody.name == "BrotherGlassBody(Clone)")
       {
         GameObject gameObject = GameObject.Find("BrotherBody(Clone)");
-        if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 2 && (bool)gameObject && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
+        if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 2 && (bool)gameObject && gameObject.GetComponent<CharacterBody>().healthComponent.alive && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
         {
           UmbralMithrix.timeCrystals.RemoveAt(0);
           gameObject.GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);

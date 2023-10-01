@@ -16,7 +16,7 @@ namespace UmbralMithrix
     private float missileStopwatch = 0f;
     private float shockwaveInterval = 3.75f;
     private float pizzaInterval = 1.5f;
-    private float missileInterval = 1.5f;
+    private float missileInterval = 1.25f;
 
     private void Start()
     {

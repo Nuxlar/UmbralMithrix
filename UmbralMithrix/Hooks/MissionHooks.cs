@@ -1,7 +1,5 @@
 using EntityStates.Missions.BrotherEncounter;
 using RoR2;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
@@ -99,9 +97,8 @@ namespace UmbralMithrix
         foreach (Renderer componentsInChild in child1.GetComponentsInChildren<Renderer>())
           componentsInChild.material = material;
       }
-      Debug.LogWarning(self.phaseBossGroup.bestObservedSubtitle);
       self.phaseBossGroup.bestObservedName = "Umbral Mithrix";
-      self.phaseBossGroup.bestObservedSubtitle = "The Collective";
+      self.phaseBossGroup.bestObservedSubtitle = "<sprite name=\"CloudLeft\"> The Collective <sprite name=\"CloudRight\">";
       ScriptedCombatEncounter.SpawnInfo spawnInfo1;
       if (PhaseCounter.instance.phase == 2)
       {
