@@ -22,6 +22,12 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.1.2**
+
+- Fixes Moonstorm/Starstorm bug (fr this time)
+- Swaps P3 crystals with glass clones
+- Changes how some things work internally to fix the bug
+
 **2.1.1**
 
 - Adds semi-tracking leap (jumps to a random player position)

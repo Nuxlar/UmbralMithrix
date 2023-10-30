@@ -26,7 +26,6 @@ namespace UmbralMithrix
       On.RoR2.CharacterMaster.OnBodyDeath += CharacterMaster_OnBodyDeath;
       On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
       On.RoR2.CombatDirector.OnEnable += CombatDirector_OnEnable;
-      On.EntityStates.Destructible.TimeCrystalDeath.Explode += TimeCrystalDeath_Explode;
       On.RoR2.BasicPickupDropTable.GenerateWeightedSelection += BasicPickupDropTable_GenerateWeightedSelection;
       On.RoR2.PickupTransmutationManager.RebuildPickupGroups += PickupTransmutationManager_RebuildPickupGroups;
       On.RoR2.HealthComponent.SendDamageDealt += HealthComponent_SendDamageDealt;
@@ -82,7 +81,7 @@ namespace UmbralMithrix
           this.P2ThresholdEvent(body.gameObject);
           hc.health = hc.fullHealth * 0.75f;
           damageReport.damageInfo.rejected = true;
-          body.AddBuff(RoR2Content.Buffs.Immune);
+          GameObject.Find("BrotherBody(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
         }
       }
       if (body && hc && body.name == "BrotherHurtBodyP3(Clone)" && PhaseCounter.instance.phase == 3 && !UmbralMithrix.p3ThresholdReached)
@@ -94,7 +93,7 @@ namespace UmbralMithrix
           this.P3ThresholdEvent(body.gameObject);
           hc.health = hc.fullHealth * 0.75f;
           damageReport.damageInfo.rejected = true;
-          body.AddBuff(RoR2Content.Buffs.Immune);
+          GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
         }
       }
       orig(damageReport);
@@ -131,6 +130,18 @@ namespace UmbralMithrix
         if ((bool)child)
           GameObject.Destroy(child.gameObject);
       }
+      if (body.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance.phase == 3)
+      {
+        body.levelMoveSpeed = 0;
+        body.baseMoveSpeed = 0;
+        body.baseMaxHealth /= 4;
+        body.teamComponent.teamIndex = TeamIndex.Monster;
+        SkillLocator skillLocator = body.skillLocator;
+        skillLocator.primary = new GenericSkill();
+        skillLocator.secondary = new GenericSkill();
+        skillLocator.utility = new GenericSkill();
+        skillLocator.special = new GenericSkill();
+      }
       if (!(body.name == "BrotherHurtBody(Clone)") || PhaseCounter.instance.phase != 4)
         return;
       body.levelMoveSpeed = 0;
@@ -159,23 +170,6 @@ namespace UmbralMithrix
         self.gameObject.SetActive(false);
       else
         orig(self);
-    }
-
-    private void TimeCrystalDeath_Explode(On.EntityStates.Destructible.TimeCrystalDeath.orig_Explode orig, TimeCrystalDeath self)
-    {
-      if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 3)
-      {
-        self.damageStat = 0;
-        int count = UmbralMithrix.timeCrystals.Count;
-        if (count != 1)
-          UmbralMithrix.timeCrystals.RemoveAt(0);
-        else if (count == 1)
-        {
-          UmbralMithrix.timeCrystals.RemoveAt(0);
-          GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
-        }
-      }
-      orig(self);
     }
 
     private void BasicPickupDropTable_GenerateWeightedSelection(
@@ -256,7 +250,7 @@ namespace UmbralMithrix
         placementRule.maxDistance = 10f;
         placementRule.position = UmbralMithrix.p23PizzaPoints[key];
         Xoroshiro128Plus rng = RoR2Application.rng;
-        DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(UmbralMithrix.timeCrystalCard, placementRule, rng)
+        DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(UmbralMithrix.mithrixGlassCard, placementRule, rng)
         {
           summonerBodyObject = summoner,
           onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult =>
@@ -264,7 +258,6 @@ namespace UmbralMithrix
             TetherVfxOrigin tetherVfxOrigin = spawnResult.spawnedInstance.gameObject.AddComponent<TetherVfxOrigin>();
             tetherVfxOrigin.tetherPrefab = UmbralMithrix.tether;
             tetherVfxOrigin.AddTether(summoner.transform);
-            spawnResult.spawnedInstance.GetComponent<TeamComponent>().teamIndex = TeamIndex.Monster;
           })
         });
         UmbralMithrix.timeCrystals.Add(summoner);
@@ -375,52 +368,6 @@ namespace UmbralMithrix
       {
         baseToken = "<color=#c6d5ff><size=120%>Mithrix: Enough of your toys.</color></size>"
       });
-    }
-
-    private int CountLivingPlayers()
-    {
-      int num = 0;
-      ReadOnlyCollection<TeamComponent> teamMembers = TeamComponent.GetTeamMembers(TeamIndex.Player);
-      for (int index = 0; index < teamMembers.Count; ++index)
-      {
-        CharacterBody body = teamMembers[index].body;
-        if (body.isPlayerControlled && (bool)(UnityEngine.Object)body.healthComponent && body.healthComponent.alive)
-          ++num;
-      }
-      return num;
-    }
-
-    private void SetScene(string sceneName)
-    {
-      if (!(bool)(UnityEngine.Object)NetworkManagerSystem.singleton)
-        throw new ConCommandException("set_scene failed: NetworkManagerSystem is not available.");
-      SceneCatalog.GetSceneDefForCurrentScene();
-      SceneDef defFromSceneName = SceneCatalog.GetSceneDefFromSceneName(sceneName);
-      if (!(bool)(UnityEngine.Object)defFromSceneName)
-        throw new ConCommandException("\"" + sceneName + "\" is not a valid scene.");
-      if ((bool)(UnityEngine.Object)NetworkManager.singleton)
-      {
-        int num = NetworkManager.singleton.isNetworkActive ? 1 : 0;
-      }
-      if (NetworkManager.singleton.isNetworkActive)
-      {
-        if (defFromSceneName.isOfflineScene)
-          throw new ConCommandException("Cannot switch to scene \"" + sceneName + "\": Cannot switch to offline-only scene while in a network session.");
-      }
-      else if (!defFromSceneName.isOfflineScene)
-        throw new ConCommandException("Cannot switch to scene \"" + sceneName + "\": Cannot switch to online-only scene while not in a network session.");
-      if (NetworkServer.active)
-      {
-        Debug.LogFormat("Setting server scene to {0}", (object)sceneName);
-        NetworkManagerSystem.singleton.ServerChangeScene(sceneName);
-      }
-      else
-      {
-        if (NetworkClient.active)
-          throw new ConCommandException("Cannot change scene while connected to a remote server.");
-        Debug.LogFormat("Setting offline scene to {0}", (object)sceneName);
-        NetworkManagerSystem.singleton.ServerChangeScene(sceneName);
-      }
     }
   }
 }

@@ -136,10 +136,10 @@ namespace UmbralMithrix
       On.EntityStates.BrotherMonster.SkyLeapDeathState.orig_OnEnter orig,
       SkyLeapDeathState self)
     {
-      if (self.characterBody.name == "BrotherGlassBody(Clone)")
+      if (self.characterBody.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 2)
       {
         GameObject gameObject = GameObject.Find("BrotherBody(Clone)");
-        if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 2 && (bool)gameObject && gameObject.GetComponent<CharacterBody>().healthComponent.alive && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
+        if ((bool)gameObject && gameObject.GetComponent<CharacterBody>().healthComponent.alive && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
         {
           UmbralMithrix.timeCrystals.RemoveAt(0);
           gameObject.GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
@@ -148,6 +148,18 @@ namespace UmbralMithrix
         if (!NetworkServer.active)
           return;
         self.DestroyBodyAsapServer();
+      }
+      else if (self.characterBody.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
+      {
+        GameObject gameObject = GameObject.Find("BrotherHurtBodyP3(Clone)");
+        if ((bool)gameObject && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
+        {
+          UmbralMithrix.timeCrystals.RemoveAt(0);
+          gameObject.GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
+        }
+        else
+          UmbralMithrix.timeCrystals.RemoveAt(0);
+        orig(self);
       }
       else
         orig(self);
