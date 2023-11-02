@@ -62,6 +62,7 @@ namespace UmbralMithrix
       UmbralMithrix.leapIndicator = GameObject.Instantiate(UmbralMithrix.leapIndicatorPrefab, self.characterBody.footPosition, Quaternion.identity);
       float radius = self.characterBody.radius / 2;
       UmbralMithrix.leapIndicator.transform.localScale = new Vector3(radius, radius, radius);
+      UmbralMithrix.leapIndicator.AddComponent<SelfDestructController>();
       NetworkServer.Spawn(UmbralMithrix.leapIndicatorPrefab);
       orig(self);
     }
@@ -69,8 +70,6 @@ namespace UmbralMithrix
     private void ExitSkyLeap_OnEnter(On.EntityStates.BrotherMonster.ExitSkyLeap.orig_OnEnter orig, ExitSkyLeap self)
     {
       orig(self);
-      if ((bool)UmbralMithrix.leapIndicator)
-        EntityState.Destroy(UmbralMithrix.leapIndicator);
       if (!(bool)PhaseCounter.instance || PhaseCounter.instance.phase != 2)
         return;
       GenericSkill genericSkill = (bool)self.skillLocator ? self.skillLocator.special : null;

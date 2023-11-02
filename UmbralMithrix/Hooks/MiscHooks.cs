@@ -134,7 +134,8 @@ namespace UmbralMithrix
       {
         body.levelMoveSpeed = 0;
         body.baseMoveSpeed = 0;
-        body.baseMaxHealth /= 4;
+        body.baseMaxHealth = 75f;
+        body.levelMaxHealth = 22f;
         body.teamComponent.teamIndex = TeamIndex.Monster;
         SkillLocator skillLocator = body.skillLocator;
         skillLocator.primary = new GenericSkill();

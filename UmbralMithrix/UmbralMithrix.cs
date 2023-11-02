@@ -18,7 +18,7 @@ using UnityEngine.Networking;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.2")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.3")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]

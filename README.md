@@ -22,6 +22,11 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.1.3**
+
+- Reduces P3 clone HP significantly
+- Fixes leap indicator lingering if Mithrix dies while leaping
+
 **2.1.2**
 
 - Fixes Moonstorm/Starstorm bug (fr this time)
