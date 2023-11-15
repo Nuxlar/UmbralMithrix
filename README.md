@@ -22,6 +22,12 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.1.4**
+
+- MOONSTORM/STARSTORM BUG FIXED FINALLY (THANK YOU NEBBY!!!) (ALSO ANY OTHER WEIRD INCOMPATS SHOULD BE FIXED)
+- Fixes P4 pizzas not working if you die in practice mode
+- Fixes multiplayer P4 releasing multiple shockwaves (maybe)
+
 **2.1.3**
 
 - Reduces P3 clone HP significantly

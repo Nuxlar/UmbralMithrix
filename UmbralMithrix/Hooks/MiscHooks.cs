@@ -147,7 +147,6 @@ namespace UmbralMithrix
         return;
       body.levelMoveSpeed = 0;
       body.baseMoveSpeed = 0;
-      body.gameObject.AddComponent<P4Controller>();
       body.inventory.GiveItem(UmbralMithrix.UmbralItem);
       body.AddBuff(RoR2Content.Buffs.Immune);
       body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
@@ -161,8 +160,24 @@ namespace UmbralMithrix
       orig(self, body);
       if (!NetworkServer.active || !body.isPlayerControlled)
         return;
-      if (UmbralMithrix.practiceModeEnabled && !self.IsExtraLifePendingServer())
+      if (UmbralMithrix.practiceModeEnabled && !self.IsExtraLifePendingServer() && PhaseCounter.instance)
+      {
         self.RespawnExtraLife();
+        if (PhaseCounter.instance.phase == 4)
+        {
+          List<CharacterBody> bodies = new();
+          foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+          {
+            if (cm.teamIndex == TeamIndex.Player)
+            {
+              CharacterBody cb = cm.GetBody();
+              if (cb && cb.isPlayerControlled)
+                bodies.Add(cb);
+            }
+          }
+          GameObject.Find("BrotherHurtBody(Clone)").GetComponent<P4Controller>().playerBodies = bodies;
+        }
+      }
     }
 
     private void CombatDirector_OnEnable(On.RoR2.CombatDirector.orig_OnEnable orig, CombatDirector self)

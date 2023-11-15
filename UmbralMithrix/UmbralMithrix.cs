@@ -18,7 +18,7 @@ using UnityEngine.Networking;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.3")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.4")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -106,6 +106,8 @@ namespace UmbralMithrix
 
     public void Awake()
     {
+      mithrixHurt.AddComponent<P4Controller>();
+      leapIndicatorPrefab.AddComponent<NetworkIdentity>();
       mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "CastUlt").First().requiredSkill = null;
       mithrixHurtP3.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(StaggerEnter));
       mithrixHurtP3Master.GetComponent<CharacterMaster>().bodyPrefab = mithrixHurtP3;
@@ -115,6 +117,8 @@ namespace UmbralMithrix
       mithrixHurtP3Card.nodeGraphType = mithrixHurtCard.nodeGraphType;
       mithrixHurtP3Card.requiredFlags = mithrixHurtCard.requiredFlags;
       mithrixHurtP3Card.forbiddenFlags = mithrixHurtCard.forbiddenFlags;
+      ContentAddition.AddBody(mithrixHurtP3);
+      ContentAddition.AddMaster(mithrixHurtP3Master);
       Destroy(staticUltLine.GetComponent<RotateAroundAxis>());
       leftP4Line.GetComponent<RotateAroundAxis>().fastRotationSpeed = 10f;
       rightP4Line.GetComponent<RotateAroundAxis>().fastRotationSpeed = 10f;

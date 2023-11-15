@@ -10,7 +10,7 @@ namespace UmbralMithrix
   {
     public bool finishedItemSteal = false;
     private CharacterBody body;
-    private List<CharacterBody> playerBodies = new();
+    public List<CharacterBody> playerBodies = new();
     private float shockwaveStopwatch = 0f;
     private float pizzaStopwatch = 0f;
     private float missileStopwatch = 0f;
