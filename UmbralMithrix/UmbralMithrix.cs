@@ -2,7 +2,6 @@ using BepInEx;
 using EntityStates;
 using EntityStates.BrotherMonster;
 using EntityStates.BrotherMonster.Weapon;
-using MonoMod.Cil;
 using R2API;
 using Rewired.ComponentControls.Effects;
 using RoR2;
@@ -18,7 +17,7 @@ using UnityEngine.Networking;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.4")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.5")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -70,7 +69,7 @@ namespace UmbralMithrix
       }
     };
     public static ItemDef UmbralItem;
-    public static GameObject leapIndicatorPrefab = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Vagrant/VagrantNovaAreaIndicator.prefab").WaitForCompletion();
+    public static GameObject leapIndicatorPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Vagrant/VagrantNovaAreaIndicator.prefab").WaitForCompletion(), "UmbralLeapIndicator");
     public static GameObject leapIndicator;
     public static SpawnCard timeCrystalCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/WeeklyRun/bscTimeCrystal.asset").WaitForCompletion();
     public static GameObject mithrixMaster = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherMaster.prefab").WaitForCompletion();

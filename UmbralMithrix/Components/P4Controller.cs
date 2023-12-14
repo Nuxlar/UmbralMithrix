@@ -3,6 +3,7 @@ using RoR2.Projectile;
 using EntityStates.BrotherMonster;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace UmbralMithrix
 {
@@ -10,6 +11,7 @@ namespace UmbralMithrix
   {
     public bool finishedItemSteal = false;
     private CharacterBody body;
+    private bool isServer = false;
     public List<CharacterBody> playerBodies = new();
     private float shockwaveStopwatch = 0f;
     private float pizzaStopwatch = 0f;
@@ -21,6 +23,7 @@ namespace UmbralMithrix
     private void Start()
     {
       this.body = this.gameObject.GetComponent<CharacterBody>();
+      this.isServer = this.gameObject.GetComponent<NetworkIdentity>().isServer;
       foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
       {
         if (cm.teamIndex == TeamIndex.Player)
@@ -34,7 +37,7 @@ namespace UmbralMithrix
 
     private void FixedUpdate()
     {
-      if (finishedItemSteal && this.body.healthComponent && this.body.healthComponent.alive)
+      if (finishedItemSteal && this.body.healthComponent && this.body.healthComponent.alive && this.isServer)
       {
         this.missileStopwatch += Time.deltaTime;
         this.pizzaStopwatch += Time.deltaTime;

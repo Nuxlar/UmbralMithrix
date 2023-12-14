@@ -40,30 +40,34 @@ namespace UmbralMithrix
     private void HoldSkyLeap_OnEnter(On.EntityStates.BrotherMonster.HoldSkyLeap.orig_OnEnter orig, HoldSkyLeap self)
     {
       HoldSkyLeap.duration = ModConfig.CrushingLeap.Value;
-      List<CharacterBody> playerBodies = new();
-      foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+      if (self.isAuthority)
       {
-        if (cm.teamIndex == TeamIndex.Player)
+        List<CharacterBody> playerBodies = new();
+        foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
         {
-          CharacterBody cb = cm.GetBody();
-          if (cb && cb.isPlayerControlled)
-            playerBodies.Add(cb);
+          if (cm.teamIndex == TeamIndex.Player)
+          {
+            CharacterBody cb = cm.GetBody();
+            if (cb && cb.isPlayerControlled)
+              playerBodies.Add(cb);
+          }
         }
+        if (playerBodies.Count > 0)
+        {
+          Vector3 target = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].footPosition;
+          RaycastHit hitInfo;
+          if (Physics.Raycast(new Ray(target, Vector3.down), out hitInfo, 200f, (int)LayerIndex.world.mask, QueryTriggerInteraction.Ignore))
+            self.characterMotor.Motor.SetPositionAndRotation(hitInfo.point + new Vector3(0, 10, 0), Quaternion.identity);
+          else
+            self.characterMotor.Motor.SetPositionAndRotation(target, Quaternion.identity);
+        }
+        GameObject workPls = GameObject.Instantiate(UmbralMithrix.leapIndicatorPrefab, self.characterBody.footPosition, Quaternion.identity);
+        float radius = self.characterBody.radius / 2;
+        workPls.transform.localScale = new Vector3(radius, radius, radius);
+        workPls.AddComponent<SelfDestructController>();
+        UmbralMithrix.leapIndicator = workPls;
+        NetworkServer.Spawn(workPls);
       }
-      if (playerBodies.Count > 0)
-      {
-        Vector3 target = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].footPosition;
-        RaycastHit hitInfo;
-        if (Physics.Raycast(new Ray(target, Vector3.down), out hitInfo, 200f, (int)LayerIndex.world.mask, QueryTriggerInteraction.Ignore))
-          self.characterMotor.Motor.SetPositionAndRotation(hitInfo.point + new Vector3(0, 10, 0), Quaternion.identity);
-        else
-          self.characterMotor.Motor.SetPositionAndRotation(target, Quaternion.identity);
-      }
-      UmbralMithrix.leapIndicator = GameObject.Instantiate(UmbralMithrix.leapIndicatorPrefab, self.characterBody.footPosition, Quaternion.identity);
-      float radius = self.characterBody.radius / 2;
-      UmbralMithrix.leapIndicator.transform.localScale = new Vector3(radius, radius, radius);
-      UmbralMithrix.leapIndicator.AddComponent<SelfDestructController>();
-      NetworkServer.Spawn(UmbralMithrix.leapIndicatorPrefab);
       orig(self);
     }
 

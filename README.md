@@ -22,6 +22,12 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.1.5**
+
+- Fixed multiplayer P4 sending out multiple pizzas/shockwaves (fr this time)
+- Fixed multiplayer skyleap wonky targeting (indicator spawns on one player but lands on another)
+- Updated R2API Content Management dependency
+
 **2.1.4**
 
 - MOONSTORM/STARSTORM BUG FIXED FINALLY (THANK YOU NEBBY!!!) (ALSO ANY OTHER WEIRD INCOMPATS SHOULD BE FIXED)

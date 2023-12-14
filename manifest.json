@@ -1,11 +1,11 @@
 ﻿{
   "name": "UmbralMithrix",
-  "version_number": "2.1.4",
+  "version_number": "2.1.5",
   "website_url": "https://github.com/FocusedFault/UmbralMithrix/issues",
   "description": "A reworked Mithrix fight",
   "dependencies": [
     "Rune580-Risk_Of_Options-2.7.0",
-    "RiskofThunder-R2API_ContentManagement-1.0.2",
+    "RiskofThunder-R2API_ContentManagement-1.0.3",
     "RiskofThunder-R2API_Prefab-1.0.3",
     "RiskofThunder-R2API_Language-1.0.1"
   ]
