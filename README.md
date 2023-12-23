@@ -22,6 +22,15 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.1.6**
+
+- Removes turret killing on P3 (for both Engi and Gunner turrets)
+- Judgement Compat
+  - Reduces P2 clone HP by 75%
+  - Reduces clone orb damage by 25%
+  - Removes P3 drone kills
+  - Reduces P3 clone HP
+
 **2.1.5**
 
 - Fixed multiplayer P4 sending out multiple pizzas/shockwaves (fr this time)

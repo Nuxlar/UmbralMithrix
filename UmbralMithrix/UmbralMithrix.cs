@@ -17,7 +17,7 @@ using UnityEngine.Networking;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.5")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.6")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -205,8 +205,16 @@ namespace UmbralMithrix
       CharacterMotor component6 = mithrixGlass.GetComponent<CharacterMotor>();
       component3.mass = ModConfig.mass.Value;
       component3.airControl = ModConfig.aircontrol.Value;
-      component4.baseMaxHealth = ModConfig.basehealth.Value;
-      component4.levelMaxHealth = ModConfig.levelhealth.Value;
+      if (Run.instance && Run.instance.name.Contains("Judgement"))
+      {
+        component4.baseMaxHealth = ModConfig.basehealth.Value * 0.25f;
+        component4.levelMaxHealth = ModConfig.levelhealth.Value * 0.25f;
+      }
+      else
+      {
+        component4.baseMaxHealth = ModConfig.basehealth.Value;
+        component4.levelMaxHealth = ModConfig.levelhealth.Value;
+      }
       component4.baseDamage = ModConfig.basedamage.Value / 2f;
       component4.levelDamage = ModConfig.leveldamage.Value / 2f;
       component6.airControl = ModConfig.aircontrol.Value;

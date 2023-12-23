@@ -111,7 +111,8 @@ namespace UmbralMithrix
       {
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
         self.inventory.GiveItemString(RoR2Content.Items.AdaptiveArmor.name);
-        this.KillAllDrones();
+        if (Run.instance && !Run.instance.name.Contains("Judgement"))
+          this.KillAllDrones();
         EffectManager.SpawnEffect(UmbralMithrix.implodeEffect, new EffectData()
         {
           origin = body.corePosition,
@@ -134,8 +135,8 @@ namespace UmbralMithrix
       {
         body.levelMoveSpeed = 0;
         body.baseMoveSpeed = 0;
-        body.baseMaxHealth = 75f;
-        body.levelMaxHealth = 22f;
+        body.baseMaxHealth = 50f;
+        body.levelMaxHealth = 15f;
         body.teamComponent.teamIndex = TeamIndex.Monster;
         SkillLocator skillLocator = body.skillLocator;
         skillLocator.primary = new GenericSkill();
@@ -370,7 +371,7 @@ namespace UmbralMithrix
         if (characterMaster.teamIndex == teamIndex)
         {
           CharacterBody body = characterMaster.GetBody();
-          if ((bool)(UnityEngine.Object)body && (bool)(UnityEngine.Object)body.healthComponent && (body.name.Contains("Drone") || body.name.Contains("Turret")))
+          if ((bool)(UnityEngine.Object)body && (bool)(UnityEngine.Object)body.healthComponent && body.name.Contains("Drone"))
           {
             body.healthComponent.Suicide();
             ++num;
