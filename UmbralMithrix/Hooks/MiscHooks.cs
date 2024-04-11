@@ -6,9 +6,11 @@ using HG;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using RoR2;
+using RoR2.CharacterAI;
 using RoR2.Networking;
 using RoR2.Projectile;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
@@ -21,8 +23,10 @@ namespace UmbralMithrix
   {
     public MiscHooks()
     {
+      IL.RoR2.CharacterAI.BaseAI.FindEnemyHurtBox += TargetOnlyPlayers;
       IL.RoR2.CharacterBody.UpdateAllTemporaryVisualEffects += AddUmbralParticles;
       IL.RoR2.CharacterModel.UpdateOverlays += AddUmbralOverlay;
+      On.RoR2.CharacterAI.BaseAI.FindEnemyHurtBox += ChangeP3CloneTargeting;
       On.RoR2.CharacterMaster.OnBodyDeath += CharacterMaster_OnBodyDeath;
       On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
       On.RoR2.CombatDirector.OnEnable += CombatDirector_OnEnable;
@@ -35,6 +39,45 @@ namespace UmbralMithrix
       On.EntityStates.FrozenState.OnEnter += FrozenState_OnEnter;
       On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += AddTimedBuff_BuffDef_float;
       On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
+    }
+
+    private void TargetOnlyPlayers(ILContext il)
+    {
+      ILCursor c = new ILCursor(il);
+
+      if (c.TryGotoNext(MoveType.After, x => x.MatchCallOrCallvirt<BullseyeSearch>(nameof(BullseyeSearch.GetResults))))
+      {
+        c.Emit(OpCodes.Ldarg_0);
+        c.EmitDelegate((IEnumerable<HurtBox> results, BaseAI instance) =>
+        {
+          if (instance && instance.body.name == "BrotherBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
+          {
+            // Filter results to only target players (don't target player allies like drones)
+            IEnumerable<HurtBox> playerControlledTargets = results.Where(hurtBox =>
+                            {
+                              GameObject entityObject = HurtBox.FindEntityObject(hurtBox);
+                              return entityObject && entityObject.TryGetComponent(out CharacterBody characterBody) && characterBody.isPlayerControlled;
+                            });
+
+            // If there are no players, use the default target so that the AI doesn't end up doing nothing
+            return playerControlledTargets.Any() ? playerControlledTargets : results;
+          }
+          else
+            return results;
+        });
+      }
+    }
+
+    private HurtBox ChangeP3CloneTargeting(On.RoR2.CharacterAI.BaseAI.orig_FindEnemyHurtBox orig, BaseAI self, float maxDistance, bool full360Vision, bool filterByLoS)
+    {
+      if (self && self.body.name == "BrotherBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
+      {
+        maxDistance = float.PositiveInfinity;
+        filterByLoS = false;
+        full360Vision = true;
+      }
+
+      return orig(self, maxDistance, full360Vision, filterByLoS);
     }
 
     private void AddUmbralParticles(ILContext il)
@@ -111,13 +154,6 @@ namespace UmbralMithrix
       {
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
         self.inventory.GiveItemString(RoR2Content.Items.AdaptiveArmor.name);
-        if (Run.instance && !Run.instance.name.Contains("Judgement"))
-          this.KillAllDrones();
-        EffectManager.SpawnEffect(UmbralMithrix.implodeEffect, new EffectData()
-        {
-          origin = body.corePosition,
-          scale = body.radius + 100f
-        }, false);
       }
       if (body.name == "BrotherBody(Clone)" || body.name == "BrotherGlassBody(Clone)")
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);

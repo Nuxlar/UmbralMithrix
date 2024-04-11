@@ -2,6 +2,8 @@
 
 **CHECK OUT THE SONG MOD MADE FOR THE FIGHT! [AltMithrixTheme](https://thunderstore.io/package/Nuxlar/AltMithrixTheme/) (works without umbral)**
 
+**NEW LOGBOOK AUDIO! READ BY WAYNE JUNE (DARKEST DUNGEON NARRATOR) USING AI (control volume with SFX slider not music)**
+
 **_SUBMIT ANY ISSUES FOUND WITH A LOG TO THE LINK ABOVE_**
 
 Major reworks to the fight, a new trophy item, and a practice mode. When you spawn on the moon there'll be a shrine to optionally activate the mode. You only need to interact with it once even if you're using LunarApostles. When completing the fight you'll get a trophy item to track your victories against Umbral.
@@ -21,6 +23,16 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 - Everyone else who gave feedback, ideas, and bug reports
 
 ## Changelog
+
+**2.2.0**
+
+- Added narration for "Core of the Collective" logbook entry (2 buttons added to logbook entry - Play/Stop)
+- Added some formatting for the "Core of the Collective" logbook entry
+- Makes P3 invincible Mithrix chase players only
+- Removes P3 drone destruction
+- Increases P4 pizza damage
+- Increases P4 shockwave damage
+- Increases P4 missile damage
 
 **2.1.6**
 

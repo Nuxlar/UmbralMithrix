@@ -51,7 +51,7 @@ namespace UmbralMithrix
           Vector3 vector3_1 = (bool)this.body.inputBank ? this.body.inputBank.aimDirection : this.body.transform.forward;
           float num3 = 180f / num1;
           float num4 = (float)(3.0 + (int)this.body.radius * 1.0);
-          float num5 = this.body.damage * 0.3f;
+          float num5 = this.body.damage * 0.5f;
           Quaternion quaternion = Util.QuaternionSafeLookRotation(vector3_1);
           for (int index = 0; index < num1; ++index)
           {
@@ -88,7 +88,7 @@ namespace UmbralMithrix
         for (int index2 = 0; index2 < 9; ++index2)
         {
           Vector3 forward = Quaternion.AngleAxis(num * index2, Vector3.up) * vector3_3;
-          ProjectileManager.instance.FireProjectile(prefab, footPosition, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.body.damage * (UltChannelState.waveProjectileDamageCoefficient * 0.25f), UltChannelState.waveProjectileForce / 8f, Util.CheckRoll(this.body.crit, this.body.master));
+          ProjectileManager.instance.FireProjectile(prefab, footPosition, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.body.damage * (UltChannelState.waveProjectileDamageCoefficient * 0.5f), UltChannelState.waveProjectileForce / 8f, Util.CheckRoll(this.body.crit, this.body.master));
         }
       }
       if (this.shockwaveStopwatch >= shockwaveInterval)
@@ -101,7 +101,7 @@ namespace UmbralMithrix
         for (int index = 0; index < ExitSkyLeap.waveProjectileCount; ++index)
         {
           Vector3 forward = Quaternion.AngleAxis(num7 * (float)index, Vector3.up) * vector3;
-          ProjectileManager.instance.FireProjectile(ExitSkyLeap.waveProjectilePrefab, footPosition, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.body.damage * (ExitSkyLeap.waveProjectileDamageCoefficient * 0.5f), ExitSkyLeap.waveProjectileForce / 4f, Util.CheckRoll(this.body.crit, this.body.master));
+          ProjectileManager.instance.FireProjectile(ExitSkyLeap.waveProjectilePrefab, footPosition, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.body.damage * (ExitSkyLeap.waveProjectileDamageCoefficient * 0.75f), ExitSkyLeap.waveProjectileForce / 4f, Util.CheckRoll(this.body.crit, this.body.master));
         }
       }
     }

@@ -14,10 +14,12 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
+using RoR2.UI;
+using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.1.6")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.2.0")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -138,6 +140,8 @@ namespace UmbralMithrix
       PrimaryHooks primaryHooks = new PrimaryHooks();
       MissionHooks missionHooks = new MissionHooks();
       MithrixMiscHooks mithrixMiscHooks = new MithrixMiscHooks();
+
+      On.RoR2.UI.LogBook.LogBookPage.SetEntry += AddLogbookButtons;
     }
 
     private void P4DeathOrbSetup()
@@ -314,7 +318,7 @@ namespace UmbralMithrix
       LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_NAME", "Core of The Collective");
       LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_PICKUP", "A trophy from a battle hard fought.");
       LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_DESC", "A trophy from a battle hard fought.");
-      LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_LORE", "We should have stopped.\n\nWhen we discovered the void, it raised a lot of questions for us. The void was a physical place, a depository for a sapient species that fit somewhere in the matter of our realm, a curiosity we could observe. But there were seams, an inbetween space that sewed places like the void and ours together. The wall that separated corporeality, a fathomless null stretched to infinity. An ineffable, dark vastness that resided between, truly embodying the name of what 'the void' meant to many before our discoveries. It was decidedly designated as separate from our physical realm, it was simply declared as 'something else'. A dark nothing, an umbral domain.\n\nWe should have left it alone.\n\nA few of us wanted to study this further, an advancement into metaphysical elements could have bridged the gap into faster than light travel. Tapping into this space, it became immediately clear we weren't alone. We expected the dread, the feeling of cold nothing as your physical senses were ripped from your consciousness. We didn't expect the hatred. Overwhelming malevolence and contempt filled my mind, touching edges of my consciousness I've never felt before, laying waste to memories, replacing them all with that twisted disdain. It was only for a moment, but I felt myself there for eternity, drifting in that inbetween. I had a revelation in that time, in the fleeting moments between where my mind could bear the onslaught. The hatred wasn't directed at me, this wasn't a result of us trespassing or invading, it was loathing pure and undiluted. It was indiscriminate\n\nIt was inevitable.\n\nWe destroyed the pathway to this place of course. We held on to this secret, bearing the responsibility as guardians. A terrible burden, but required. Years later I still find myself reeling, unable to banish that violating malevolence from the hidden corners of my mind. Now though, I’m at the end of my life and I've long since realized my greatest fears may come to pass without my intervention. When I - the last guardian - am gone, the gate of this prison may yet again be opened and without concern for that malignant presence that would pass through. I use this as my last testament to implore you, to beg, do not open that gate. Do not let that horror manifest itself outside of that ethereal realm. Do not set that umbra free.");
+      LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_LORE", "<style=cMono>\nWe should have stopped.\n\n</style>When we discovered the void, it raised a lot of questions for us. The void was a physical place, a depository for a sapient species that fit somewhere in the matter of our realm, a curiosity we could observe. But there were seams, an inbetween space that sewed places like the void and ours together. The wall that separated corporeality, a fathomless null stretched to infinity. An ineffable, dark vastness that resided between, truly embodying the name of what 'the void' meant to many before our discoveries. It was decidedly designated as separate from our physical realm, it was simply declared as 'something else'. A dark nothing, an umbral domain.\n\n<style=cMono>We should have left it alone.</style>\n\nA few of us wanted to study this further, an advancement into metaphysical elements could have bridged the gap into faster than light travel. Tapping into this space, it became immediately clear we weren't alone. We expected the dread, the feeling of cold nothing as your physical senses were ripped from your consciousness. We didn't expect the hatred. Overwhelming malevolence and contempt filled my mind, touching edges of my consciousness I've never felt before, laying waste to memories, replacing them all with that twisted disdain. It was only for a moment, but I felt myself there for eternity, drifting in that inbetween. I had a revelation in that time, in the fleeting moments between where my mind could bear the onslaught. The hatred wasn't directed at me, this wasn't a result of us trespassing or invading, it was loathing pure and undiluted. It was indiscriminate\n\n<style=cMono>It was inevitable.</style>\n\nWe destroyed the pathway to this place of course. We held on to this secret, bearing the responsibility as guardians. A terrible burden, but required. Years later I still find myself reeling, unable to banish that violating malevolence from the hidden corners of my mind. Now though, I’m at the end of my life and I've long since realized my greatest fears may come to pass without my intervention. When I - the last guardian - am gone, the gate of this prison may yet again be opened and without concern for that malignant presence that would pass through. I use this as my last testament to implore you, to beg, do not open that gate. Do not let that horror manifest itself outside of that ethereal realm.\n\n<style=cMono>Do not set that umbra free.</style>\n");
       LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_SUBTITLENAMETOKEN", "The Collective");
       LanguageAPI.Add("UMBRALMITHRIX_UMBRAL_MODIFIER", "Umbral");
       UmbralItem = ScriptableObject.CreateInstance<ItemDef>();
@@ -330,6 +334,67 @@ namespace UmbralMithrix
       foreach (Renderer componentsInChild in UmbralItem.pickupModelPrefab.GetComponentsInChildren<Renderer>())
         componentsInChild.material = material;
       ContentAddition.AddItemDef(UmbralItem);
+    }
+
+    private void AddLogbookButtons(On.RoR2.UI.LogBook.LogBookPage.orig_SetEntry orig, RoR2.UI.LogBook.LogBookPage self, UserProfile userProfile, RoR2.UI.LogBook.Entry entry)
+    {
+      orig(self, userProfile, entry);
+      if (entry.modelPrefab && entry.modelPrefab.name == "PickupUmbralCore")
+      {
+        if (!self.transform.gameObject.GetComponent<LogbookButtonAdder>())
+          self.transform.gameObject.AddComponent<LogbookButtonAdder>();
+        else
+        {
+          foreach (Transform child in self.transform)
+          {
+            if (child.name == "NakedButton (Back)(Clone)" && !child.gameObject.activeSelf)
+              child.gameObject.SetActive(true);
+          }
+        }
+      }
+      else
+      {
+        foreach (Transform child in self.transform)
+        {
+          if (child.name == "NakedButton (Back)(Clone)" && child.gameObject.activeSelf)
+            child.gameObject.SetActive(false);
+        }
+      }
+    }
+
+    public class LogbookButton : MonoBehaviour
+    {
+      public HGButton hgButton;
+
+      public void Start()
+      {
+        this.hgButton = this.GetComponent<HGButton>();
+        this.hgButton.onClick = new Button.ButtonClickedEvent();
+        this.hgButton.onClick.AddListener(() =>
+        {
+          Util.PlaySound("Play_UI_menuClick", RoR2Application.instance.gameObject);
+          if (this.GetComponent<LanguageTextMeshController>().token == "Play Entry")
+            Util.PlaySound("Play_UmbralLore", RoR2Application.instance.gameObject);
+          else
+            Util.PlaySound("Stop_UmbralLore", RoR2Application.instance.gameObject);
+        });
+      }
+    }
+
+    public class LogbookButtonAdder : MonoBehaviour
+    {
+      public void Start()
+      {
+        GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.transform.Find("NakedButton (Back)").gameObject, this.transform);
+        gameObject.AddComponent<LogbookButton>();
+        gameObject.GetComponent<LanguageTextMeshController>().token = "Play Entry";
+        gameObject.transform.localPosition = new Vector3(-650f, -486f, 0f);
+
+        gameObject = UnityEngine.Object.Instantiate<GameObject>(this.transform.Find("NakedButton (Back)").gameObject, this.transform);
+        gameObject.AddComponent<LogbookButton>();
+        gameObject.GetComponent<LanguageTextMeshController>().token = "Stop Entry";
+        gameObject.transform.localPosition = new Vector3(-435f, -486f, 0f);
+      }
     }
   }
 }

@@ -4,7 +4,7 @@ using EntityStates.BrotherMonster.Weapon;
 using EntityStates.LunarWisp;
 using RoR2;
 using RoR2.Projectile;
-using System;
+using RoR2.CharacterAI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -278,7 +278,19 @@ namespace UmbralMithrix
           Xoroshiro128Plus rng = RoR2Application.rng;
           DirectorSpawnRequest directorSpawnRequest = new DirectorSpawnRequest(UmbralMithrix.mithrixCard, placementRule, rng);
           directorSpawnRequest.summonerBodyObject = self.gameObject;
-          directorSpawnRequest.onSpawnedServer += (Action<SpawnCard.SpawnResult>)(spawnResult => spawnResult.spawnedInstance.GetComponent<CharacterMaster>().GetBody().AddBuff(RoR2Content.Buffs.Immune));
+          directorSpawnRequest.onSpawnedServer += spawnResult =>
+          {
+            CharacterMaster master = spawnResult.spawnedInstance.GetComponent<CharacterMaster>();
+            master.GetBody().AddBuff(RoR2Content.Buffs.Immune);
+            foreach (BaseAI baseAI in master.GetComponents<BaseAI>())
+            {
+              if (baseAI)
+              {
+                baseAI.fullVision = true;
+                baseAI.neverRetaliateFriendlies = true;
+              }
+            }
+          };
           DirectorCore.instance.TrySpawnObject(directorSpawnRequest);
         }
         orig(self);
