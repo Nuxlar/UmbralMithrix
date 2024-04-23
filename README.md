@@ -24,6 +24,10 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.2.1**
+
+- Adds a config for the purple arena wall/ceiling VFX (now off by default)
+
 **2.2.0**
 
 - Added narration for "Core of the Collective" logbook entry (2 buttons added to logbook entry - Play/Stop)

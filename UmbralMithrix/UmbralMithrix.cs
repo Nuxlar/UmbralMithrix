@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.2.0")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.2.1")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]

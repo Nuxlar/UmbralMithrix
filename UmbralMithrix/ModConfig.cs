@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Rewired;
 using RiskOfOptions;
 using RiskOfOptions.OptionConfigs;
 using RiskOfOptions.Options;
@@ -7,6 +8,7 @@ namespace UmbralMithrix
 {
   internal class ModConfig
   {
+    public static ConfigEntry<bool> purpleArena;
     public static ConfigEntry<float> basehealth;
     public static ConfigEntry<float> levelhealth;
     public static ConfigEntry<float> basedamage;
@@ -39,6 +41,8 @@ namespace UmbralMithrix
 
     public static void InitConfig(ConfigFile config)
     {
+      ModConfig.purpleArena = config.Bind<bool>("General", "Purple Arena", false, "Adds swirling purple walls/ceiling to the arena. Applies at the start of the fight.");
+
       ModConfig.basehealth = config.Bind<float>("Stats", "Base Health", 1000f, "Vanilla: 1000");
       ModConfig.levelhealth = config.Bind<float>("Stats", "Level Health", 325f, "Health gained per level. Vanilla: 300");
       ModConfig.basedamage = config.Bind<float>("Stats", "Base Damage", 15f, "Vanilla: 16");
@@ -51,6 +55,7 @@ namespace UmbralMithrix
       ModConfig.jumpingpower = config.Bind<float>("Stats", "Moon Shoes", 50f, "How high Mithrix jumps. Vanilla: 25");
       ModConfig.acceleration = config.Bind<float>("Stats", "Acceleration", 100f, "Vanilla: 45");
       ModConfig.aircontrol = config.Bind<float>("Stats", "Air Control", 0.5f, "Vanilla: 0.25");
+
       ModConfig.PrimStocks = config.Bind<int>("Skills", "Primary Stocks", 1, "Max Stocks for Mithrix's Weapon Slam. Vanilla: 1");
       ModConfig.SecStocks = config.Bind<int>("Skills", "Secondary Stocks", 1, "Max Stocks for Mithrix's Dash Attack. Vanilla: 1");
       ModConfig.UtilStocks = config.Bind<int>("Skills", "Util Stocks", 3, "Max Stocks for Mithrix's Dash. Vanilla: 2");
@@ -58,6 +63,7 @@ namespace UmbralMithrix
       ModConfig.SecCD = config.Bind<float>("Skills", "Secondary Cooldown", 4.5f, "Cooldown for Mithrix's Dash Attack. Vanilla: 5");
       ModConfig.UtilCD = config.Bind<float>("Skills", "Util Cooldown", 2.5f, "Cooldown for Mithrix's Dash. Vanilla: 3");
       ModConfig.SpecialCD = config.Bind<float>("Skills", "Special Cooldown", 30f, "Cooldown for Mithrix's Jump Attack. Vanilla: 30");
+
       ModConfig.CrushingLeap = config.Bind<float>("Skill Mods", "Crushing Leap", 3f, "How long Mithrix stays in the air during the crushing leap. Vanilla: 3");
       ModConfig.SlamOrbProjectileCount = config.Bind<int>("Skill Mods", "Orb Projectile Count", 3, "Orbs fired by weapon slam in a circle. Vanilla: N/A");
       ModConfig.LunarShardAdd = config.Bind<int>("Skill Mods", "Shard Add Count", 1, "Bonus shards added to each shot of lunar shards. Vanilla: N/A");
@@ -68,6 +74,9 @@ namespace UmbralMithrix
       ModConfig.ShardHoming = config.Bind<float>("Skill Mods", "Shard Homing", 25f, "How strongly lunar shards home in to targets. Vanilla: 20");
       ModConfig.ShardRange = config.Bind<float>("Skill Mods", "Shard Range", 100f, "Range (distance) in which shards look for targets. Vanilla: 80");
       ModConfig.ShardCone = config.Bind<float>("Skill Mods", "Shard Cone", 120f, "Cone (Angle) in which shards look for targets. Vanilla: 90");
+
+      ModSettingsManager.AddOption(new CheckBoxOption(ModConfig.purpleArena));
+
       ModSettingsManager.AddOption(new StepSliderOption(ModConfig.basehealth, new StepSliderConfig()
       {
         min = 500f,

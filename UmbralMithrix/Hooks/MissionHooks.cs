@@ -94,8 +94,11 @@ namespace UmbralMithrix
       if ((bool)child1)
       {
         child1.gameObject.SetActive(self.shouldEnableArenaWalls);
-        foreach (Renderer componentsInChild in child1.GetComponentsInChildren<Renderer>())
-          componentsInChild.material = material;
+        if (ModConfig.purpleArena.Value)
+        {
+          foreach (Renderer componentsInChild in child1.GetComponentsInChildren<Renderer>())
+            componentsInChild.material = material;
+        }
       }
       self.phaseBossGroup.bestObservedName = "Umbral Mithrix";
       self.phaseBossGroup.bestObservedSubtitle = "<sprite name=\"CloudLeft\"> The Collective <sprite name=\"CloudRight\">";
