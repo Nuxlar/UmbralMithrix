@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using RoR2.CharacterSpeech;
 
 namespace UmbralMithrix
 {
@@ -30,15 +31,29 @@ namespace UmbralMithrix
       On.RoR2.CharacterMaster.OnBodyDeath += CharacterMaster_OnBodyDeath;
       On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
       On.RoR2.CombatDirector.OnEnable += CombatDirector_OnEnable;
-      On.RoR2.BasicPickupDropTable.GenerateWeightedSelection += BasicPickupDropTable_GenerateWeightedSelection;
-      On.RoR2.PickupTransmutationManager.RebuildPickupGroups += PickupTransmutationManager_RebuildPickupGroups;
-      On.RoR2.HealthComponent.SendDamageDealt += HealthComponent_SendDamageDealt;
+      On.RoR2.HealthComponent.TakeDamage += HealthComponent_TakeDamage;
       On.RoR2.Stage.Start += Stage_Start;
       On.RoR2.Run.Start += Run_Start;
       On.RoR2.CharacterMaster.OnBodyStart += CharacterMaster_OnBodyStart;
       On.EntityStates.FrozenState.OnEnter += FrozenState_OnEnter;
       On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += AddTimedBuff_BuffDef_float;
-      On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
+      On.EntityStates.Destructible.TimeCrystalDeath.OnEnter += RemoveUmbralImmune;
+    }
+
+    private void RemoveUmbralImmune(On.EntityStates.Destructible.TimeCrystalDeath.orig_OnEnter orig, TimeCrystalDeath self)
+    {
+      if (PhaseCounter.instance)
+      {
+        GameObject gameObject = PhaseCounter.instance.phase == 2 ? GameObject.Find("BrotherBody(Clone)") : GameObject.Find("BrotherHurtBodyP3(Clone)");
+        if ((bool)gameObject && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
+        {
+          UmbralMithrix.timeCrystals.RemoveAt(0);
+          gameObject.GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
+        }
+        else if (UmbralMithrix.timeCrystals.Count > 0)
+          UmbralMithrix.timeCrystals.RemoveAt(0);
+      }
+      orig(self);
     }
 
     private void TargetOnlyPlayers(ILContext il)
@@ -50,7 +65,7 @@ namespace UmbralMithrix
         c.Emit(OpCodes.Ldarg_0);
         c.EmitDelegate((IEnumerable<HurtBox> results, BaseAI instance) =>
         {
-          if (instance && instance.body.name == "BrotherBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
+          if (instance && (instance.body.name == "BrotherBody(Clone)" || instance.body.name == "BrotherGlassBody(Clone)" || instance.body.name == "BrotherHurtBody(Clone)"))
           {
             // Filter results to only target players (don't target player allies like drones)
             IEnumerable<HurtBox> playerControlledTargets = results.Where(hurtBox =>
@@ -70,7 +85,7 @@ namespace UmbralMithrix
 
     private HurtBox ChangeP3CloneTargeting(On.RoR2.CharacterAI.BaseAI.orig_FindEnemyHurtBox orig, BaseAI self, float maxDistance, bool full360Vision, bool filterByLoS)
     {
-      if (self && self.body.name == "BrotherBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
+      if (self && (self.body.name == "BrotherBody(Clone)" || self.body.name == "BrotherGlassBody(Clone)" || self.body.name == "BrotherHurtBody(Clone)") && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
       {
         maxDistance = float.PositiveInfinity;
         filterByLoS = false;
@@ -90,7 +105,7 @@ namespace UmbralMithrix
       c.Emit(OpCodes.Ldarg_0);
       c.EmitDelegate<Func<int, CharacterBody, int>>((vengeanceCount, self) =>
       {
-        if (self.name.Contains("Brother") && self.inventory && self.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0)
+        if (self.name.Contains("Brother") && self.inventory && self.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0 && ModConfig.purpleMithrix.Value)
           vengeanceCount++;
         return vengeanceCount;
       });
@@ -112,34 +127,39 @@ namespace UmbralMithrix
       });
     }
 
-    private void HealthComponent_SendDamageDealt(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
+    private void HealthComponent_TakeDamage(On.RoR2.HealthComponent.orig_TakeDamage orig, HealthComponent self, DamageInfo damageInfo)
     {
-      CharacterBody body = damageReport.victimBody;
-      HealthComponent hc = damageReport.victimBody.healthComponent;
+      CharacterBody body = self.body;
+      HealthComponent hc = self;
       if (body && hc && body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 2 && !UmbralMithrix.p2ThresholdReached)
       {
-        if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+        if (hc.health - damageInfo.damage <= hc.fullHealth * 0.75f)
         {
           UmbralMithrix.p2ThresholdReached = true;
           this.P2ThresholdEvent(body.gameObject);
           hc.health = hc.fullHealth * 0.75f;
-          damageReport.damageInfo.rejected = true;
+          damageInfo.rejected = true;
           GameObject.Find("BrotherBody(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
         }
       }
       if (body && hc && body.name == "BrotherHurtBodyP3(Clone)" && PhaseCounter.instance.phase == 3 && !UmbralMithrix.p3ThresholdReached)
       {
-        if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+        if (hc.health - damageInfo.damage <= hc.fullHealth * 0.75f)
         {
           UmbralMithrix.p3ThresholdReached = true;
           GameObject.Find("BrotherBody(Clone)").GetComponent<HealthComponent>().health = 1f;
           this.P3ThresholdEvent(body.gameObject);
           hc.health = hc.fullHealth * 0.75f;
-          damageReport.damageInfo.rejected = true;
+          damageInfo.rejected = true;
           GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
         }
       }
-      orig(damageReport);
+      if (body && hc && (body.name == "BrotherHurtBody(Clone)" || body.name == "InactiveVoidling(Clone)") && PhaseCounter.instance.phase == 4)
+      {
+        if (!UmbralMithrix.finishedItemSteal)
+          damageInfo.rejected = true;
+      }
+      orig(self, damageInfo);
     }
 
     private void CharacterMaster_OnBodyStart(
@@ -157,28 +177,19 @@ namespace UmbralMithrix
       }
       if (body.name == "BrotherBody(Clone)" || body.name == "BrotherGlassBody(Clone)")
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
-      if (body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 1)
+      if (body.name == "BrotherBody(Clone)")
       {
-        body.gameObject.AddComponent<CloneController>();
-        ChildLocator component = SceneInfo.instance.GetComponent<ChildLocator>();
-        if (!(bool)component)
-          return;
-        Transform child = component.FindChild("CenterOfArena");
-        if ((bool)child)
-          GameObject.Destroy(child.gameObject);
-      }
-      if (body.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance.phase == 3)
-      {
-        body.levelMoveSpeed = 0;
-        body.baseMoveSpeed = 0;
-        body.baseMaxHealth = 50f;
-        body.levelMaxHealth = 15f;
-        body.teamComponent.teamIndex = TeamIndex.Monster;
-        SkillLocator skillLocator = body.skillLocator;
-        skillLocator.primary = new GenericSkill();
-        skillLocator.secondary = new GenericSkill();
-        skillLocator.utility = new GenericSkill();
-        skillLocator.special = new GenericSkill();
+        if (PhaseCounter.instance && PhaseCounter.instance.phase != 3)
+          body.gameObject.AddComponent<CloneController>();
+        if (PhaseCounter.instance && PhaseCounter.instance.phase == 1)
+        {
+          ChildLocator component = SceneInfo.instance.GetComponent<ChildLocator>();
+          if (!(bool)component)
+            return;
+          Transform child = component.FindChild("CenterOfArena");
+          if ((bool)child)
+            GameObject.Destroy(child.gameObject);
+        }
       }
       if (!(body.name == "BrotherHurtBody(Clone)") || PhaseCounter.instance.phase != 4)
         return;
@@ -186,8 +197,9 @@ namespace UmbralMithrix
       body.baseMoveSpeed = 0;
       body.inventory.GiveItem(UmbralMithrix.UmbralItem);
       body.AddBuff(RoR2Content.Buffs.Immune);
-      body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
+      body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 45);
     }
+
 
     private void CharacterMaster_OnBodyDeath(
       On.RoR2.CharacterMaster.orig_OnBodyDeath orig,
@@ -195,7 +207,9 @@ namespace UmbralMithrix
       CharacterBody body)
     {
       orig(self, body);
-      if (!NetworkServer.active || !body.isPlayerControlled)
+      if (!NetworkServer.active)
+        return;
+      if (!body.isPlayerControlled)
         return;
       if (UmbralMithrix.practiceModeEnabled && !self.IsExtraLifePendingServer() && PhaseCounter.instance)
       {
@@ -225,70 +239,31 @@ namespace UmbralMithrix
         orig(self);
     }
 
-    private void BasicPickupDropTable_GenerateWeightedSelection(
-      On.RoR2.BasicPickupDropTable.orig_GenerateWeightedSelection orig,
-      BasicPickupDropTable self,
-      Run run)
-    {
-      List<PickupIndex> pickupIndexList1 = new List<PickupIndex>();
-      List<PickupIndex> pickupIndexList2 = new List<PickupIndex>();
-      foreach (PickupIndex lunarCombinedDrop in run.availableLunarCombinedDropList)
-      {
-        ItemDef itemDef = ItemCatalog.GetItemDef(lunarCombinedDrop.itemIndex);
-        EquipmentDef equipmentDef = EquipmentCatalog.GetEquipmentDef(lunarCombinedDrop.equipmentIndex);
-        if ((bool)itemDef && !itemDef.name.Contains("Umbral"))
-          pickupIndexList2.Add(lunarCombinedDrop);
-        if ((bool)equipmentDef)
-          pickupIndexList2.Add(lunarCombinedDrop);
-      }
-      foreach (PickupIndex availableLunarItemDrop in run.availableLunarItemDropList)
-      {
-        ItemDef itemDef = ItemCatalog.GetItemDef(availableLunarItemDrop.itemIndex);
-        if ((bool)itemDef && !itemDef.name.Contains("Umbral"))
-          pickupIndexList1.Add(availableLunarItemDrop);
-      }
-      run.availableLunarCombinedDropList = pickupIndexList2;
-      run.availableLunarItemDropList = pickupIndexList1;
-      orig(self, run);
-    }
-
-    private void PickupTransmutationManager_RebuildPickupGroups(
-      On.RoR2.PickupTransmutationManager.orig_RebuildPickupGroups orig)
-    {
-      orig();
-      List<PickupIndex> pickupIndexList = new List<PickupIndex>();
-      foreach (PickupIndex pickupIndex in PickupTransmutationManager.itemTierLunarGroup)
-      {
-        ItemDef itemDef = ItemCatalog.GetItemDef(pickupIndex.itemIndex);
-        EquipmentDef equipmentDef = EquipmentCatalog.GetEquipmentDef(pickupIndex.equipmentIndex);
-        if ((bool)itemDef && !itemDef.name.Contains("Umbral"))
-          pickupIndexList.Add(pickupIndex);
-        if ((bool)equipmentDef)
-          pickupIndexList.Add(pickupIndex);
-      }
-      PickupTransmutationManager.itemTierLunarGroup = pickupIndexList.ToArray();
-    }
-
     private void P2ThresholdEvent(GameObject summoner)
     {
       UmbralMithrix.timeCrystals.Clear();
-      DirectorPlacementRule placementRule = new DirectorPlacementRule();
-      placementRule.placementMode = DirectorPlacementRule.PlacementMode.NearestNode;
-      placementRule.minDistance = 3f;
-      placementRule.maxDistance = 10f;
-      placementRule.position = new Vector3(-88.5f, 491.5f, -0.3f);
-      Xoroshiro128Plus rng = RoR2Application.rng;
-      DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(UmbralMithrix.mithrixGlassCard, placementRule, rng)
+      int num = 4;
+      for (int key = 0; key < num; ++key)
       {
-        summonerBodyObject = summoner,
-        onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult =>
+        DirectorPlacementRule placementRule = new DirectorPlacementRule();
+        placementRule.placementMode = DirectorPlacementRule.PlacementMode.NearestNode;
+        placementRule.minDistance = 3f;
+        placementRule.maxDistance = 10f;
+        placementRule.position = UmbralMithrix.p23PizzaPoints[key];
+        Xoroshiro128Plus rng = RoR2Application.rng;
+        DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(UmbralMithrix.timeCrystalCard, placementRule, rng)
         {
-          TetherVfxOrigin tetherVfxOrigin = spawnResult.spawnedInstance.GetComponent<CharacterMaster>().GetBody().gameObject.AddComponent<TetherVfxOrigin>();
-          tetherVfxOrigin.tetherPrefab = UmbralMithrix.tether;
-          tetherVfxOrigin.AddTether(summoner.transform);
-        })
-      });
-      UmbralMithrix.timeCrystals.Add(summoner);
+          summonerBodyObject = summoner,
+          onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult =>
+          {
+            //  spawnResult.spawnedInstance.GetComponent<Inventory>().GiveItem(UmbralMithrix.UmbralItem);
+            TetherVfxOrigin tetherVfxOrigin = spawnResult.spawnedInstance.gameObject.AddComponent<TetherVfxOrigin>();
+            tetherVfxOrigin.tetherPrefab = UmbralMithrix.tether;
+            tetherVfxOrigin.AddTether(summoner.transform);
+          })
+        });
+        UmbralMithrix.timeCrystals.Add(summoner);
+      }
     }
 
     private void P3ThresholdEvent(GameObject summoner)
@@ -303,11 +278,12 @@ namespace UmbralMithrix
         placementRule.maxDistance = 10f;
         placementRule.position = UmbralMithrix.p23PizzaPoints[key];
         Xoroshiro128Plus rng = RoR2Application.rng;
-        DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(UmbralMithrix.mithrixGlassCard, placementRule, rng)
+        DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(UmbralMithrix.timeCrystalCard, placementRule, rng)
         {
           summonerBodyObject = summoner,
           onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult =>
           {
+            //  spawnResult.spawnedInstance.GetComponent<Inventory>().GiveItem(UmbralMithrix.UmbralItem);
             TetherVfxOrigin tetherVfxOrigin = spawnResult.spawnedInstance.gameObject.AddComponent<TetherVfxOrigin>();
             tetherVfxOrigin.tetherPrefab = UmbralMithrix.tether;
             tetherVfxOrigin.AddTether(summoner.transform);
@@ -315,13 +291,6 @@ namespace UmbralMithrix
         });
         UmbralMithrix.timeCrystals.Add(summoner);
       }
-    }
-
-    private bool ItemStealController_BrotherItemFilter(
-      On.RoR2.ItemStealController.orig_BrotherItemFilter orig,
-      ItemIndex itemIndex)
-    {
-      return false;
     }
 
     private void Run_Start(On.RoR2.Run.orig_Start orig, Run self)

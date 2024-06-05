@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.2.1")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.3.0")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -75,7 +75,7 @@ namespace UmbralMithrix
     public static GameObject leapIndicator;
     public static SpawnCard timeCrystalCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/WeeklyRun/bscTimeCrystal.asset").WaitForCompletion();
     public static GameObject mithrixMaster = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherMaster.prefab").WaitForCompletion();
-    public static GameObject lunarMissile = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/LunarMissileProjectile.prefab").WaitForCompletion();
+    public static GameObject lunarMissile = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/EliteLunar/LunarMissileProjectile.prefab").WaitForCompletion(), "UmbralLunarMissile", false);
     public static GameObject mithrixHurtP3Master = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherHurtMaster.prefab").WaitForCompletion(), "BrotherHurtMasterP3");
     public static GameObject mithrix = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherBody.prefab").WaitForCompletion();
     public static GameObject mithrixHurtP3 = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherHurtBody.prefab").WaitForCompletion(), "BrotherHurtBodyP3");
@@ -86,6 +86,10 @@ namespace UmbralMithrix
     public static SpawnCard mithrixGlassCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Junk/BrotherGlass/cscBrotherGlass.asset").WaitForCompletion();
     public static GameObject firePillar = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherFirePillar.prefab").WaitForCompletion();
     public static GameObject firePillarGhost = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherFirePillarGhost.prefab").WaitForCompletion();
+    public static GameObject fireWallParent = PrefabAPI.InstantiateClone(new GameObject(), "FireWallParent", false);
+    public static GameObject fireWallGhostParent = PrefabAPI.InstantiateClone(new GameObject(), "FireWallGhostParent", false);
+    public static GameObject fireWall = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherFirePillar.prefab").WaitForCompletion(), "BrotherFireWall", false);
+    public static GameObject fireWallGhost = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherFirePillarGhost.prefab").WaitForCompletion(), "BrotherFireWallGhost", false);
     public static GameObject leftP4Line = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateLeft.prefab").WaitForCompletion(), "P4UltLineLeft");
     public static GameObject rightP4Line = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateRight.prefab").WaitForCompletion(), "P4UltLineRight");
     public static GameObject leftUltLine = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateLeft.prefab").WaitForCompletion();
@@ -103,13 +107,20 @@ namespace UmbralMithrix
     public static Transform practiceFire = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/bazaar/BazaarLight1Large Variant.prefab").WaitForCompletion(), "PracticeFire").transform.GetChild(0);
     public static GameObject implodeEffect = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Vagrant/VagrantNovaExplosion.prefab").WaitForCompletion();
     public static GameObject tether = Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/EliteEarth/AffixEarthTetherVFX.prefab").WaitForCompletion();
-    BuffDef fogNotify = Addressables.LoadAssetAsync<BuffDef>("RoR2/Base/Common/bdVoidFogStrong.asset").WaitForCompletion();
+    SkillDef fireLunarShardsDef = Addressables.LoadAssetAsync<SkillDef>("RoR2/Base/Brother/FireLunarShards.asset").WaitForCompletion();
+    public static GameObject p4Indicator = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidRaidCrab/MultiBeamRayIndicator.prefab").WaitForCompletion(), "FlameWallIndicator", false);
 
     public void Awake()
     {
+      LineRenderer lineRenderer = p4Indicator.transform.GetChild(1).GetComponent<LineRenderer>();
+      lineRenderer.startWidth = 7.5f;
+      lineRenderer.endWidth = 7.5f;
+      lineRenderer.textureMode = LineTextureMode.Stretch;
+
       mithrixHurt.AddComponent<P4Controller>();
       leapIndicatorPrefab.AddComponent<NetworkIdentity>();
       mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "CastUlt").First().requiredSkill = null;
+      //  mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "Sprint after Target").First().minDistance = 25f;
       mithrixHurtP3.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(StaggerEnter));
       mithrixHurtP3Master.GetComponent<CharacterMaster>().bodyPrefab = mithrixHurtP3;
       mithrixHurtP3Card.name = "cscBrotherHurtP3";
@@ -131,6 +142,49 @@ namespace UmbralMithrix
       rightUltLine.GetComponent<RotateAroundAxis>().slowRotationSpeed = 21f;
       firePillar.transform.localScale = new Vector3(2f, 2f, 2f);
       firePillarGhost.transform.localScale = new Vector3(2f, 2f, 2f);
+
+      lunarMissile.GetComponent<ProjectileSteerTowardTarget>().rotationSpeed = 100f;
+      ProjectileDirectionalTargetFinder targetFinder = lunarMissile.GetComponent<ProjectileDirectionalTargetFinder>();
+      targetFinder.allowTargetLoss = false;
+      targetFinder.testLoS = true;
+      targetFinder.lookRange = 200f;
+      targetFinder.lookCone = 360f;
+
+      fireWall.GetComponent<ProjectileController>().ghostPrefab = fireWallGhost;
+      fireWall.GetComponent<ProjectileController>().cannotBeDeleted = true;
+      fireWall.GetComponent<ProjectileDotZone>().lifetime = 40f;
+      fireWallParent.transform.parent = fireWall.transform;
+      Transform t1 = fireWall.transform.GetChild(0);
+      Transform t2 = fireWall.transform.GetChild(1);
+      t1.parent = fireWallParent.transform;
+      t2.parent = fireWallParent.transform;
+      t1.transform.localPosition = new Vector3(0f, 0f, 0f);
+      t2.transform.localPosition = new Vector3(0f, 0f, 0f);
+      fireWallParent.transform.localPosition = new Vector3(0f, 0f, 3.25f);
+      fireWall.transform.localScale = new Vector3(1f, 1f, 25f);
+
+      fireWallGhostParent.transform.parent = fireWallGhost.transform;
+      Transform t3 = fireWallGhost.transform.GetChild(0);
+      Transform t4 = fireWallGhost.transform.GetChild(1);
+      t3.parent = fireWallGhostParent.transform;
+      t4.parent = fireWallGhostParent.transform;
+      t3.transform.localPosition = new Vector3(0f, 0f, 0f);
+      t4.transform.localPosition = new Vector3(0f, 0f, 0f);
+      fireWallGhostParent.transform.localPosition = new Vector3(0f, 0f, 3.25f);
+      fireWallGhost.transform.localScale = new Vector3(1f, 1f, 25f);
+
+      RotateAroundAxis rotateFireWall = fireWall.AddComponent<RotateAroundAxis>();
+      rotateFireWall.rotateAroundAxis = RotateAroundAxis.RotationAxis.Y;
+      rotateFireWall.fastRotationSpeed = 7.5f;
+      rotateFireWall.slowRotationSpeed = 7.5f;
+      rotateFireWall.speed = RotateAroundAxis.Speed.Slow;
+
+      ContentAddition.AddProjectile(fireWall);
+
+      AISkillDriver fireShards = mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "Sprint and FireLunarShards").First();
+      fireShards.minDistance = 20f;
+      fireLunarShardsDef.baseMaxStock = 6;
+
       ModConfig.InitConfig(Config);
       CreateDoppelItem();
       P4DeathOrbSetup();
@@ -162,8 +216,8 @@ namespace UmbralMithrix
 
     private void MiscSetup()
     {
-      mithrix.GetComponent<CharacterBody>().bodyFlags = mithrix.GetComponent<CharacterBody>().bodyFlags | CharacterBody.BodyFlags.ImmuneToExecutes;
-      mithrixHurtP3.GetComponent<CharacterBody>().bodyFlags = mithrix.GetComponent<CharacterBody>().bodyFlags | CharacterBody.BodyFlags.ImmuneToExecutes;
+      mithrix.GetComponent<CharacterBody>().bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes;
+      mithrixHurtP3.GetComponent<CharacterBody>().bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes;
       mithrixGlass.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(GlassSpawnState));
     }
 
@@ -311,6 +365,7 @@ namespace UmbralMithrix
     private void AddContent()
     {
       ContentAddition.AddEntityState<GlassSpawnState>(out _);
+      ContentAddition.AddEntityState<SpawnFirewall>(out _);
     }
 
     private void CreateDoppelItem()
@@ -324,6 +379,7 @@ namespace UmbralMithrix
       UmbralItem = ScriptableObject.CreateInstance<ItemDef>();
       UmbralItem.name = "UmbralMithrixUmbralItem";
       UmbralItem.deprecatedTier = ItemTier.Lunar;
+      UmbralItem.tags = new ItemTag[] { ItemTag.WorldUnique, ItemTag.AIBlacklist, ItemTag.CannotCopy, ItemTag.CannotDuplicate };
       UmbralItem.nameToken = "UMBRALMITHRIX_UMBRAL_NAME";
       UmbralItem.pickupToken = "UMBRALMITHRIX_UMBRAL_PICKUP";
       UmbralItem.descriptionToken = "UMBRALMITHRIX_UMBRAL_DESC";

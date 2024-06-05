@@ -30,11 +30,20 @@ namespace UmbralMithrix
       this.stopwatch += Time.deltaTime;
       if ((double)this.stopwatch < this.interval)
         return;
+      foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+      {
+        if (cm.teamIndex == TeamIndex.Player)
+        {
+          CharacterBody cb = cm.GetBody();
+          if (cb && cb.isPlayerControlled)
+            playerBodies.Add(cb);
+        }
+      }
       this.stopwatch %= this.interval;
       DirectorPlacementRule placementRule = new DirectorPlacementRule();
       placementRule.placementMode = DirectorPlacementRule.PlacementMode.NearestNode;
-      placementRule.minDistance = 3f;
-      placementRule.maxDistance = 10f;
+      placementRule.minDistance = 8f;
+      placementRule.maxDistance = 16f;
       placementRule.position = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].corePosition;
       Xoroshiro128Plus rng = RoR2Application.rng;
       DirectorCore.instance.TrySpawnObject(new DirectorSpawnRequest(cloneCard, placementRule, rng)

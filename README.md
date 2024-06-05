@@ -24,6 +24,25 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.3.0**
+
+- Adds config for umbral effect on mithrix (purple lighting when spawning in)
+- Adds Mithrix/Clones focusing mainly players throughout the fight
+- Adds glass clones for phase 2
+- Removes shockwave on swipe
+- Increases distance for glass clone spawns
+- Reduces distance Mithrix fire lunar shards (70 -> 20)
+- Reduces lunar shard stock count (12 -> 6)
+- Fixes HP thresholds not applying sometimes
+- Fixes trophy item dropping outside of the fight
+- Fixes P4 pizza breaking if dying in practice mode
+- Phase 2 Tweaks
+  - Instead of 4 static pizzas at fixed spots, the static pizzas surround a random player
+  - There is no longer a spinning pizza under Mithrix
+- Phase 4 Tweaks
+  - Adds giant spinning flame wall
+  - Increases intervals for pizza/shockwaves/missiles
+
 **2.2.1**
 
 - Adds a config for the purple arena wall/ceiling VFX (now off by default)

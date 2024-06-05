@@ -10,15 +10,16 @@ namespace UmbralMithrix
   public class P4Controller : MonoBehaviour
   {
     public bool finishedItemSteal = false;
+    public bool spawnedWall = false;
     private CharacterBody body;
     private bool isServer = false;
     public List<CharacterBody> playerBodies = new();
     private float shockwaveStopwatch = 0f;
     private float pizzaStopwatch = 0f;
     private float missileStopwatch = 0f;
-    private float shockwaveInterval = 3.75f;
-    private float pizzaInterval = 1.5f;
-    private float missileInterval = 1.25f;
+    private float shockwaveInterval = 5f;
+    private float pizzaInterval = 2.5f;
+    private float missileInterval = 1.5f;
 
     private void Start()
     {
@@ -37,7 +38,8 @@ namespace UmbralMithrix
 
     private void FixedUpdate()
     {
-      if (finishedItemSteal && this.body.healthComponent && this.body.healthComponent.alive && this.isServer)
+      // RotateAroundAxis _fastRotationSpeed _slowRotationSpeed rotateAroundAxis Y
+      if (spawnedWall && finishedItemSteal && this.body.healthComponent && this.body.healthComponent.alive && this.isServer)
       {
         this.missileStopwatch += Time.deltaTime;
         this.pizzaStopwatch += Time.deltaTime;
@@ -52,7 +54,7 @@ namespace UmbralMithrix
           float num3 = 180f / num1;
           float num4 = (float)(3.0 + (int)this.body.radius * 1.0);
           float num5 = this.body.damage * 0.5f;
-          Quaternion quaternion = Util.QuaternionSafeLookRotation(vector3_1);
+          Quaternion quaternion = Util.QuaternionSafeLookRotation(Vector3.up);
           for (int index = 0; index < num1; ++index)
           {
             Vector3 vector3_2 = this.body.aimOrigin + Quaternion.AngleAxis((float)((num2 - 1) * (double)num3 - (double)num3 * (num1 - 1) / 2.0), vector3_1) * Vector3.up * num4;
@@ -71,6 +73,15 @@ namespace UmbralMithrix
       }
       if (this.pizzaStopwatch >= pizzaInterval)
       {
+        foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+        {
+          if (cm.teamIndex == TeamIndex.Player)
+          {
+            CharacterBody cb = cm.GetBody();
+            if (cb && cb.isPlayerControlled)
+              playerBodies.Add(cb);
+          }
+        }
         this.pizzaStopwatch %= 1;
         Vector3 vector3_3 = Vector3.ProjectOnPlane(this.body.inputBank.aimDirection, Vector3.up);
         float num = 40f;
@@ -94,7 +105,7 @@ namespace UmbralMithrix
       if (this.shockwaveStopwatch >= shockwaveInterval)
       {
         this.shockwaveStopwatch %= 1;
-        int num6 = (int)Util.PlaySound(ExitSkyLeap.soundString, this.gameObject);
+        Util.PlaySound(ExitSkyLeap.soundString, this.gameObject);
         float num7 = 360f / (float)ExitSkyLeap.waveProjectileCount;
         Vector3 vector3 = Vector3.ProjectOnPlane(this.body.inputBank.aimDirection, Vector3.up);
         Vector3 footPosition = this.body.footPosition;

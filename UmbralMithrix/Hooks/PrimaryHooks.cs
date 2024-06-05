@@ -18,6 +18,7 @@ namespace UmbralMithrix
 
     private void WeaponSlamOnEnter(On.EntityStates.BrotherMonster.WeaponSlam.orig_OnEnter orig, WeaponSlam self)
     {
+      WeaponSlam.pillarProjectilePrefab = WeaponSlam.waveProjectilePrefab;
       UmbralMithrix.hasfired = false;
       orig(self);
     }

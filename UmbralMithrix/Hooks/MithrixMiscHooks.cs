@@ -93,22 +93,47 @@ namespace UmbralMithrix
     {
       if ((bool)PhaseCounter.instance)
       {
+        UltChannelState.waveProjectileCount = 0;
         if (PhaseCounter.instance.phase == 2)
         {
+          List<CharacterBody> playerBodies = new();
+          foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+          {
+            if (cm.teamIndex == TeamIndex.Player)
+            {
+              CharacterBody cb = cm.GetBody();
+              if (cb && cb.isPlayerControlled)
+                playerBodies.Add(cb);
+            }
+          }
+
+          float distance = 50f;
           float num = 360f / ModConfig.UltimateWaves.Value;
           Vector3 vector3 = Vector3.ProjectOnPlane(self.inputBank.aimDirection, Vector3.up);
-          for (int key = 0; key < 4; ++key)
+          Vector3 center = playerBodies[Random.Range(0, playerBodies.Count)].footPosition with
           {
+            y = 491f
+          };
+
+          Vector3 point1 = center + new Vector3(-distance, 0f, -distance);
+          Vector3 point2 = center + new Vector3(distance, 0f, -distance);
+          Vector3 point3 = center + new Vector3(-distance, 0f, distance);
+          Vector3 point4 = center + new Vector3(distance, 0f, distance);
+          Vector3[] points = new Vector3[4] { point1, point2, point3, point4 };
+
+          for (int idx = 0; idx < 4; ++idx)
+          {
+            float offset = Random.Range(-10f, 10f);
+
             for (int index = 0; index < ModConfig.UltimateWaves.Value; ++index)
             {
-              Vector3 forward = Quaternion.AngleAxis(num * index, Vector3.up) * vector3;
-              ProjectileManager.instance.FireProjectile(UmbralMithrix.staticUltLine, UmbralMithrix.p23PizzaPoints[key], Util.QuaternionSafeLookRotation(forward), self.gameObject, self.characterBody.damage * UltChannelState.waveProjectileDamageCoefficient, UltChannelState.waveProjectileForce, Util.CheckRoll(self.characterBody.crit, self.characterBody.master));
+              Vector3 forward = Quaternion.AngleAxis((num + offset) * index, Vector3.up) * vector3;
+              ProjectileManager.instance.FireProjectile(UmbralMithrix.staticUltLine, points[idx], Util.QuaternionSafeLookRotation(forward), self.gameObject, self.characterBody.damage * UltChannelState.waveProjectileDamageCoefficient, UltChannelState.waveProjectileForce, Util.CheckRoll(self.characterBody.crit, self.characterBody.master));
             }
           }
         }
         if (PhaseCounter.instance.phase == 3)
         {
-          UltChannelState.waveProjectileCount = 0;
           int count = PlayerCharacterMasterController.instances.Count;
           int num1 = ModConfig.UltimateWaves.Value;
           float num2 = 360f / num1;
@@ -141,28 +166,10 @@ namespace UmbralMithrix
     {
       if (self.characterBody.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 2)
       {
-        GameObject gameObject = GameObject.Find("BrotherBody(Clone)");
-        if ((bool)gameObject && gameObject.GetComponent<CharacterBody>().healthComponent.alive && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
-        {
-          UmbralMithrix.timeCrystals.RemoveAt(0);
-          gameObject.GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
-        }
         self.DestroyModel();
         if (!NetworkServer.active)
           return;
         self.DestroyBodyAsapServer();
-      }
-      else if (self.characterBody.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 3)
-      {
-        GameObject gameObject = GameObject.Find("BrotherHurtBodyP3(Clone)");
-        if ((bool)gameObject && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
-        {
-          UmbralMithrix.timeCrystals.RemoveAt(0);
-          gameObject.GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.Immune);
-        }
-        else
-          UmbralMithrix.timeCrystals.RemoveAt(0);
-        orig(self);
       }
       else
         orig(self);
@@ -177,22 +184,12 @@ namespace UmbralMithrix
         {
           for (int index = 0; index < 6; ++index)
           {
-            int num = (int)Util.PlaySound(FireLunarShards.fireSound, self.gameObject);
+            Util.PlaySound(FireLunarShards.fireSound, self.gameObject);
             ProjectileManager.instance.FireProjectile(FireLunarShards.projectilePrefab, aimRay.origin, Quaternion.LookRotation(aimRay.direction), self.gameObject, (float)((double)self.characterBody.damage * 0.100000001490116 / 12.0), 0.0f, Util.CheckRoll(self.characterBody.crit, self.characterBody.master));
           }
         }
         else
           ProjectileManager.instance.FireProjectile(SeekingBomb.projectilePrefab, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), self.gameObject, self.characterBody.damage * (SeekingBomb.bombDamageCoefficient * 0.75f), SeekingBomb.bombForce, Util.CheckRoll(self.critStat, self.characterBody.master), speedOverride: 0.0f);
-        if ((bool)PhaseCounter.instance && self.characterBody.name == "BrotherBody(Clone)")
-        {
-          if (PhaseCounter.instance.phase != 1)
-          {
-            Vector3 vector3 = Vector3.ProjectOnPlane(self.inputBank.aimDirection, Vector3.up);
-            Vector3 footPosition = self.characterBody.footPosition;
-            Vector3 forward = Quaternion.AngleAxis(0.0f, Vector3.up) * vector3;
-            ProjectileManager.instance.FireProjectile(WeaponSlam.waveProjectilePrefab, footPosition, Util.QuaternionSafeLookRotation(forward), self.gameObject, self.characterBody.damage * WeaponSlam.waveProjectileDamageCoefficient, WeaponSlam.waveProjectileForce, Util.CheckRoll(self.characterBody.crit, self.characterBody.master));
-          }
-        }
       }
       orig(self);
     }
@@ -236,8 +233,11 @@ namespace UmbralMithrix
       On.EntityStates.BrotherMonster.SpellChannelExitState.orig_OnEnter orig,
       SpellChannelExitState self)
     {
+      SpellChannelExitState.duration = 1f;
       UmbralMithrix.finishedItemSteal = true;
       self.characterBody.gameObject.GetComponent<P4Controller>().finishedItemSteal = true;
+      self.outer.SetNextState(new SpawnFirewall());
+      /*
       bool killedAllies = false;
       foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
       {
@@ -248,6 +248,7 @@ namespace UmbralMithrix
           { cb.healthComponent.Suicide(); }
         }
       }
+      
       if (killedAllies)
       {
         Chat.SendBroadcastChat(new Chat.SimpleChatMessage()
@@ -255,6 +256,7 @@ namespace UmbralMithrix
           baseToken = "<color=#c6d5ff><size=120%>Mithrix: Perish.</color></size>"
         });
       }
+      */
       orig(self);
     }
 

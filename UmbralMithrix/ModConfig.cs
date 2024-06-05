@@ -9,6 +9,7 @@ namespace UmbralMithrix
   internal class ModConfig
   {
     public static ConfigEntry<bool> purpleArena;
+    public static ConfigEntry<bool> purpleMithrix;
     public static ConfigEntry<float> basehealth;
     public static ConfigEntry<float> levelhealth;
     public static ConfigEntry<float> basedamage;
@@ -41,6 +42,7 @@ namespace UmbralMithrix
 
     public static void InitConfig(ConfigFile config)
     {
+      ModConfig.purpleMithrix = config.Bind<bool>("General", "Purple Mithrix", true, "Adds umbral effects to Mithrix (purple when spawning in).");
       ModConfig.purpleArena = config.Bind<bool>("General", "Purple Arena", false, "Adds swirling purple walls/ceiling to the arena. Applies at the start of the fight.");
 
       ModConfig.basehealth = config.Bind<float>("Stats", "Base Health", 1000f, "Vanilla: 1000");
