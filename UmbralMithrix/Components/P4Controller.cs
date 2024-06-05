@@ -48,8 +48,8 @@ namespace UmbralMithrix
         if (this.missileStopwatch >= missileInterval)
         {
           this.missileStopwatch %= 1;
-          int num1 = 8;
-          int num2 = 8;
+          int num1 = 4;
+          int num2 = 4;
           Vector3 vector3_1 = (bool)this.body.inputBank ? this.body.inputBank.aimDirection : this.body.transform.forward;
           float num3 = 180f / num1;
           float num4 = (float)(3.0 + (int)this.body.radius * 1.0);

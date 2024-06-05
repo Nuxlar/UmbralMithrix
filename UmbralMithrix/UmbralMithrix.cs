@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.3.0")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.3.1")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -143,7 +143,7 @@ namespace UmbralMithrix
       firePillar.transform.localScale = new Vector3(2f, 2f, 2f);
       firePillarGhost.transform.localScale = new Vector3(2f, 2f, 2f);
 
-      lunarMissile.GetComponent<ProjectileSteerTowardTarget>().rotationSpeed = 100f;
+      lunarMissile.GetComponent<ProjectileSteerTowardTarget>().rotationSpeed = 90f;
       ProjectileDirectionalTargetFinder targetFinder = lunarMissile.GetComponent<ProjectileDirectionalTargetFinder>();
       targetFinder.allowTargetLoss = false;
       targetFinder.testLoS = true;
@@ -152,7 +152,7 @@ namespace UmbralMithrix
 
       fireWall.GetComponent<ProjectileController>().ghostPrefab = fireWallGhost;
       fireWall.GetComponent<ProjectileController>().cannotBeDeleted = true;
-      fireWall.GetComponent<ProjectileDotZone>().lifetime = 40f;
+      fireWall.GetComponent<ProjectileDotZone>().lifetime = 45f;
       fireWallParent.transform.parent = fireWall.transform;
       Transform t1 = fireWall.transform.GetChild(0);
       Transform t2 = fireWall.transform.GetChild(1);

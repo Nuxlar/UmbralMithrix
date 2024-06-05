@@ -24,6 +24,15 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.3.1**
+
+- Fixes Crystals not being on the right team
+- Removes crystal explosion damage
+- Reduces P4 missile count (8 -> 4)
+- Reduces P4 missile homing
+- Increases duration of P4 flame walls
+- Adds umbral overlay to crystals
+
 **2.3.0**
 
 - Adds config for umbral effect on mithrix (purple lighting when spawning in)

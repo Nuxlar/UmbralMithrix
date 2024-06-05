@@ -94,19 +94,18 @@ namespace UmbralMithrix
       if ((bool)PhaseCounter.instance)
       {
         UltChannelState.waveProjectileCount = 0;
-        if (PhaseCounter.instance.phase == 2)
+        List<CharacterBody> playerBodies = new();
+        foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
         {
-          List<CharacterBody> playerBodies = new();
-          foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
+          if (cm.teamIndex == TeamIndex.Player)
           {
-            if (cm.teamIndex == TeamIndex.Player)
-            {
-              CharacterBody cb = cm.GetBody();
-              if (cb && cb.isPlayerControlled)
-                playerBodies.Add(cb);
-            }
+            CharacterBody cb = cm.GetBody();
+            if (cb && cb.isPlayerControlled)
+              playerBodies.Add(cb);
           }
-
+        }
+        if (PhaseCounter.instance.phase == 2 && playerBodies.Count > 0)
+        {
           float distance = 50f;
           float num = 360f / ModConfig.UltimateWaves.Value;
           Vector3 vector3 = Vector3.ProjectOnPlane(self.inputBank.aimDirection, Vector3.up);

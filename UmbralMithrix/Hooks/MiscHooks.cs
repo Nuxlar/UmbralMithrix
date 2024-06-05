@@ -27,6 +27,7 @@ namespace UmbralMithrix
       IL.RoR2.CharacterAI.BaseAI.FindEnemyHurtBox += TargetOnlyPlayers;
       IL.RoR2.CharacterBody.UpdateAllTemporaryVisualEffects += AddUmbralParticles;
       IL.RoR2.CharacterModel.UpdateOverlays += AddUmbralOverlay;
+      IL.RoR2.CharacterModel.UpdateOverlays += AddUmbralOverlayCrystal;
       On.RoR2.CharacterAI.BaseAI.FindEnemyHurtBox += ChangeP3CloneTargeting;
       On.RoR2.CharacterMaster.OnBodyDeath += CharacterMaster_OnBodyDeath;
       On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
@@ -42,8 +43,11 @@ namespace UmbralMithrix
 
     private void RemoveUmbralImmune(On.EntityStates.Destructible.TimeCrystalDeath.orig_OnEnter orig, TimeCrystalDeath self)
     {
-      if (PhaseCounter.instance)
+      if (PhaseCounter.instance && (PhaseCounter.instance.phase == 2 || PhaseCounter.instance.phase == 3))
       {
+        Debug.LogWarning(TimeCrystalDeath.explosionForce);
+        TimeCrystalDeath.explosionDamageCoefficient = 0f;
+        TimeCrystalDeath.explosionForce = 0f;
         GameObject gameObject = PhaseCounter.instance.phase == 2 ? GameObject.Find("BrotherBody(Clone)") : GameObject.Find("BrotherHurtBodyP3(Clone)");
         if ((bool)gameObject && gameObject.GetComponent<CharacterBody>().HasBuff(RoR2Content.Buffs.Immune) && UmbralMithrix.timeCrystals.Count == 1)
         {
@@ -52,6 +56,11 @@ namespace UmbralMithrix
         }
         else if (UmbralMithrix.timeCrystals.Count > 0)
           UmbralMithrix.timeCrystals.RemoveAt(0);
+      }
+      else
+      {
+        TimeCrystalDeath.explosionForce = 4000f;
+        TimeCrystalDeath.explosionDamageCoefficient = 2f;
       }
       orig(self);
     }
@@ -121,9 +130,25 @@ namespace UmbralMithrix
       c.Emit(OpCodes.Ldarg_0);
       c.EmitDelegate<Func<int, CharacterModel, int>>((vengeanceCount, self) =>
       {
-        if (self.body.name.Contains("Brother") && self.body.inventory && self.body.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0)
+        if (self.body.name.Contains("Brother") && self.body.inventory && self.body.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0 && ModConfig.purpleMithrix.Value)
           vengeanceCount++;
         return vengeanceCount;
+      });
+    }
+
+    private void AddUmbralOverlayCrystal(ILContext il)
+    {
+      ILCursor c = new ILCursor(il);
+      c.GotoNext(
+           x => x.MatchLdsfld(typeof(RoR2Content.Items), "InvadingDoppelganger")
+          );
+      c.Index -= 1;
+      c.Emit(OpCodes.Ldarg_0);
+      c.EmitDelegate<Func<bool, CharacterModel, bool>>((hasInventory, self) =>
+      {
+        if (self.body.name.Contains("Crystal") && self.body.gameObject.GetComponent<ArbitraryCrystalComponent>())
+          return true;
+        return hasInventory;
       });
     }
 
@@ -172,10 +197,11 @@ namespace UmbralMithrix
         return;
       if (body.name == "BrotherHurtBodyP3(Clone)")
       {
-        self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
+        if (ModConfig.purpleMithrix.Value)
+          self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
         self.inventory.GiveItemString(RoR2Content.Items.AdaptiveArmor.name);
       }
-      if (body.name == "BrotherBody(Clone)" || body.name == "BrotherGlassBody(Clone)")
+      if ((body.name == "BrotherBody(Clone)" || body.name == "BrotherGlassBody(Clone)") && ModConfig.purpleMithrix.Value)
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
       if (body.name == "BrotherBody(Clone)")
       {
@@ -195,7 +221,8 @@ namespace UmbralMithrix
         return;
       body.levelMoveSpeed = 0;
       body.baseMoveSpeed = 0;
-      body.inventory.GiveItem(UmbralMithrix.UmbralItem);
+      if (ModConfig.purpleMithrix.Value)
+        body.inventory.GiveItem(UmbralMithrix.UmbralItem);
       body.AddBuff(RoR2Content.Buffs.Immune);
       body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 45);
     }
@@ -256,7 +283,8 @@ namespace UmbralMithrix
           summonerBodyObject = summoner,
           onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult =>
           {
-            //  spawnResult.spawnedInstance.GetComponent<Inventory>().GiveItem(UmbralMithrix.UmbralItem);
+            spawnResult.spawnedInstance.AddComponent<ArbitraryCrystalComponent>();
+            spawnResult.spawnedInstance.GetComponent<TeamComponent>().teamIndex = TeamIndex.Monster;
             TetherVfxOrigin tetherVfxOrigin = spawnResult.spawnedInstance.gameObject.AddComponent<TetherVfxOrigin>();
             tetherVfxOrigin.tetherPrefab = UmbralMithrix.tether;
             tetherVfxOrigin.AddTether(summoner.transform);
@@ -283,7 +311,8 @@ namespace UmbralMithrix
           summonerBodyObject = summoner,
           onSpawnedServer = (Action<SpawnCard.SpawnResult>)(spawnResult =>
           {
-            //  spawnResult.spawnedInstance.GetComponent<Inventory>().GiveItem(UmbralMithrix.UmbralItem);
+            spawnResult.spawnedInstance.AddComponent<ArbitraryCrystalComponent>();
+            spawnResult.spawnedInstance.GetComponent<TeamComponent>().teamIndex = TeamIndex.Monster;
             TetherVfxOrigin tetherVfxOrigin = spawnResult.spawnedInstance.gameObject.AddComponent<TetherVfxOrigin>();
             tetherVfxOrigin.tetherPrefab = UmbralMithrix.tether;
             tetherVfxOrigin.AddTether(summoner.transform);
