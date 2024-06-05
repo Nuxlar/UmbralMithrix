@@ -39,6 +39,14 @@ namespace UmbralMithrix
       On.EntityStates.FrozenState.OnEnter += FrozenState_OnEnter;
       On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += AddTimedBuff_BuffDef_float;
       On.EntityStates.Destructible.TimeCrystalDeath.OnEnter += RemoveUmbralImmune;
+      On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
+    }
+
+    private bool ItemStealController_BrotherItemFilter(
+       On.RoR2.ItemStealController.orig_BrotherItemFilter orig,
+       ItemIndex itemIndex)
+    {
+      return false;
     }
 
     private void RemoveUmbralImmune(On.EntityStates.Destructible.TimeCrystalDeath.orig_OnEnter orig, TimeCrystalDeath self)
