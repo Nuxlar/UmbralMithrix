@@ -10,16 +10,15 @@ namespace UmbralMithrix
   public class P4Controller : MonoBehaviour
   {
     public bool finishedItemSteal = false;
-    public bool spawnedWall = false;
     private CharacterBody body;
     private bool isServer = false;
     public List<CharacterBody> playerBodies = new();
     private float shockwaveStopwatch = 0f;
     private float pizzaStopwatch = 0f;
     private float missileStopwatch = 0f;
-    private float shockwaveInterval = 5f;
-    private float pizzaInterval = 2.5f;
-    private float missileInterval = 1.5f;
+    private float shockwaveInterval = 4f;
+    private float pizzaInterval = 1.5f;
+    private float missileInterval = 1.25f;
 
     private void Start()
     {
@@ -39,7 +38,7 @@ namespace UmbralMithrix
     private void FixedUpdate()
     {
       // RotateAroundAxis _fastRotationSpeed _slowRotationSpeed rotateAroundAxis Y
-      if (spawnedWall && finishedItemSteal && this.body.healthComponent && this.body.healthComponent.alive && this.isServer)
+      if (finishedItemSteal && this.body.healthComponent && this.body.healthComponent.alive && this.isServer)
       {
         this.missileStopwatch += Time.deltaTime;
         this.pizzaStopwatch += Time.deltaTime;
@@ -54,7 +53,7 @@ namespace UmbralMithrix
           float num3 = 180f / num1;
           float num4 = (float)(3.0 + (int)this.body.radius * 1.0);
           float num5 = this.body.damage * 0.5f;
-          Quaternion quaternion = Util.QuaternionSafeLookRotation(Vector3.up);
+          Quaternion quaternion = Util.QuaternionSafeLookRotation(vector3_1);
           for (int index = 0; index < num1; ++index)
           {
             Vector3 vector3_2 = this.body.aimOrigin + Quaternion.AngleAxis((float)((num2 - 1) * (double)num3 - (double)num3 * (num1 - 1) / 2.0), vector3_1) * Vector3.up * num4;

@@ -235,7 +235,6 @@ namespace UmbralMithrix
       SpellChannelExitState.duration = 1f;
       UmbralMithrix.finishedItemSteal = true;
       self.characterBody.gameObject.GetComponent<P4Controller>().finishedItemSteal = true;
-      self.outer.SetNextState(new SpawnFirewall());
       /*
       bool killedAllies = false;
       foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())

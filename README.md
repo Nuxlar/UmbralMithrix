@@ -24,6 +24,12 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.3.3**
+
+- Reverts some of the P4 changes
+  - Removes FlameWall
+  - Decreases intervals (faster)
+
 **2.3.2**
 
 - Fixes P4 using items (i forgor)

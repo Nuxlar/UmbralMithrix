@@ -232,7 +232,7 @@ namespace UmbralMithrix
       if (ModConfig.purpleMithrix.Value)
         body.inventory.GiveItem(UmbralMithrix.UmbralItem);
       body.AddBuff(RoR2Content.Buffs.Immune);
-      body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 45);
+      body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
     }
 
 
