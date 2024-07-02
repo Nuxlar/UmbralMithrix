@@ -15,7 +15,6 @@ namespace UmbralMithrix
       On.EntityStates.Missions.BrotherEncounter.Phase2.OnEnter += Phase2OnEnter;
       On.EntityStates.Missions.BrotherEncounter.Phase3.OnEnter += Phase3OnEnter;
       On.EntityStates.Missions.BrotherEncounter.Phase4.OnEnter += Phase4OnEnter;
-      On.EntityStates.Missions.BrotherEncounter.BossDeath.OnEnter += BossDeathOnEnter;
     }
 
     private void Phase1OnEnter(On.EntityStates.Missions.BrotherEncounter.Phase1.orig_OnEnter orig, Phase1 self)
@@ -56,28 +55,7 @@ namespace UmbralMithrix
     private void Phase4OnEnter(On.EntityStates.Missions.BrotherEncounter.Phase4.orig_OnEnter orig, Phase4 self)
     {
       UmbralMithrix.AdjustPhase4Stats();
-      GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(UmbralMithrix.voidling, new Vector3(-88.5f, 520f, -0.3f), Quaternion.identity);
-      gameObject.AddComponent<DeathZoneController>();
-      gameObject.GetComponent<TeamComponent>().teamIndex = TeamIndex.Monster;
-      SkillLocator skillLocator = gameObject.GetComponent<CharacterBody>().skillLocator;
-      skillLocator.primary = new GenericSkill();
-      skillLocator.secondary = new GenericSkill();
-      skillLocator.utility = new GenericSkill();
-      skillLocator.special = new GenericSkill();
-      NetworkServer.Spawn(gameObject);
       orig(self);
-    }
-
-    private void BossDeathOnEnter(On.EntityStates.Missions.BrotherEncounter.BossDeath.orig_OnEnter orig, BossDeath self)
-    {
-      orig(self);
-      GameObject.Find("InactiveVoidling(Clone)").GetComponent<HealthComponent>().Suicide();
-      TeamComponent[] objectsOfType = UnityEngine.Object.FindObjectsOfType<TeamComponent>();
-      for (int index = 0; index < objectsOfType.Length; ++index)
-      {
-        if (objectsOfType[index].teamIndex == TeamIndex.Player)
-          objectsOfType[index].GetComponent<CharacterBody>().RemoveBuff(RoR2Content.Buffs.TeamWarCry);
-      }
     }
 
     private void BrotherEncounterPhaseBaseStateOnEnter(

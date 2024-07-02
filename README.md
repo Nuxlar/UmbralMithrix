@@ -24,6 +24,11 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.3.4**
+
+- Removes Phase 4 entirely
+- Note: I don't like current Umbral Phase 4 and vanilla isn't any better, so I'm removing this phase completely until I can make a phase 4 that's better
+
 **2.3.3**
 
 - Reverts some of the P4 changes

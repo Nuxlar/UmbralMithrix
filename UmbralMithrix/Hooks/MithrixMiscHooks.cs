@@ -23,9 +23,6 @@ namespace UmbralMithrix
       On.EntityStates.BrotherMonster.FistSlam.OnEnter += FistSlam_OnEnter;
       On.EntityStates.BrotherMonster.UltChannelState.FireWave += UltChannelState_FireWave;
       On.EntityStates.BrotherMonster.SkyLeapDeathState.OnEnter += SkyLeapDeathState_OnEnter;
-      On.EntityStates.BrotherMonster.SpellChannelEnterState.OnEnter += SpellChannelEnterState_OnEnter;
-      On.EntityStates.BrotherMonster.SpellChannelState.OnEnter += SpellChannelState_OnEnter;
-      On.EntityStates.BrotherMonster.SpellChannelExitState.OnEnter += SpellChannelExitState_OnEnter;
       On.EntityStates.BrotherMonster.StaggerEnter.OnEnter += StaggerEnter_OnEnter;
       On.EntityStates.BrotherMonster.TrueDeathState.OnEnter += TrueDeathState_OnEnter;
     }
@@ -206,95 +203,36 @@ namespace UmbralMithrix
       }
     }
 
-    private void SpellChannelEnterState_OnEnter(
-      On.EntityStates.BrotherMonster.SpellChannelEnterState.orig_OnEnter orig,
-      SpellChannelEnterState self)
-    {
-      SpellChannelEnterState.duration = 3f;
-      orig(self);
-    }
-
-    private static void SpellChannelState_OnEnter(
-      On.EntityStates.BrotherMonster.SpellChannelState.orig_OnEnter orig,
-      SpellChannelState self)
-    {
-      SpellChannelState.maxDuration = 5f;
-      TeamComponent[] objectsOfType = UnityEngine.Object.FindObjectsOfType<TeamComponent>();
-      for (int index = 0; index < objectsOfType.Length; ++index)
-      {
-        if (objectsOfType[index].teamIndex == TeamIndex.Player)
-          objectsOfType[index].GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.TeamWarCry);
-      }
-      orig(self);
-    }
-
-    private void SpellChannelExitState_OnEnter(
-      On.EntityStates.BrotherMonster.SpellChannelExitState.orig_OnEnter orig,
-      SpellChannelExitState self)
-    {
-      SpellChannelExitState.duration = 1f;
-      UmbralMithrix.finishedItemSteal = true;
-      self.characterBody.gameObject.GetComponent<P4Controller>().finishedItemSteal = true;
-      /*
-      bool killedAllies = false;
-      foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
-      {
-        if (cm.teamIndex == TeamIndex.Player)
-        {
-          CharacterBody cb = cm.GetBody();
-          if (cb && !cb.isPlayerControlled && cb.healthComponent)
-          { cb.healthComponent.Suicide(); }
-        }
-      }
-      
-      if (killedAllies)
-      {
-        Chat.SendBroadcastChat(new Chat.SimpleChatMessage()
-        {
-          baseToken = "<color=#c6d5ff><size=120%>Mithrix: Perish.</color></size>"
-        });
-      }
-      */
-      orig(self);
-    }
-
     private void StaggerEnter_OnEnter(On.EntityStates.BrotherMonster.StaggerEnter.orig_OnEnter orig, StaggerEnter self)
     {
       self.duration = 0.0f;
-      if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 4)
+      if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 3 && !UmbralMithrix.spawnedClone)
       {
-        self.outer.SetNextState(new SpellChannelEnterState());
-      }
-      else
-      {
-        if ((bool)PhaseCounter.instance && PhaseCounter.instance.phase == 3 && !UmbralMithrix.spawnedClone)
+        UmbralMithrix.spawnedClone = true;
+        DirectorPlacementRule placementRule = new DirectorPlacementRule();
+        placementRule.placementMode = DirectorPlacementRule.PlacementMode.NearestNode;
+        placementRule.minDistance = 3f;
+        placementRule.maxDistance = 20f;
+        placementRule.position = new Vector3(-88.5f, 491.5f, -0.3f);
+        Xoroshiro128Plus rng = RoR2Application.rng;
+        DirectorSpawnRequest directorSpawnRequest = new DirectorSpawnRequest(UmbralMithrix.mithrixCard, placementRule, rng);
+        directorSpawnRequest.summonerBodyObject = self.gameObject;
+        directorSpawnRequest.onSpawnedServer += spawnResult =>
         {
-          UmbralMithrix.spawnedClone = true;
-          DirectorPlacementRule placementRule = new DirectorPlacementRule();
-          placementRule.placementMode = DirectorPlacementRule.PlacementMode.NearestNode;
-          placementRule.minDistance = 3f;
-          placementRule.maxDistance = 20f;
-          placementRule.position = new Vector3(-88.5f, 491.5f, -0.3f);
-          Xoroshiro128Plus rng = RoR2Application.rng;
-          DirectorSpawnRequest directorSpawnRequest = new DirectorSpawnRequest(UmbralMithrix.mithrixCard, placementRule, rng);
-          directorSpawnRequest.summonerBodyObject = self.gameObject;
-          directorSpawnRequest.onSpawnedServer += spawnResult =>
+          CharacterMaster master = spawnResult.spawnedInstance.GetComponent<CharacterMaster>();
+          master.GetBody().AddBuff(RoR2Content.Buffs.Immune);
+          foreach (BaseAI baseAI in master.GetComponents<BaseAI>())
           {
-            CharacterMaster master = spawnResult.spawnedInstance.GetComponent<CharacterMaster>();
-            master.GetBody().AddBuff(RoR2Content.Buffs.Immune);
-            foreach (BaseAI baseAI in master.GetComponents<BaseAI>())
+            if (baseAI)
             {
-              if (baseAI)
-              {
-                baseAI.fullVision = true;
-                baseAI.neverRetaliateFriendlies = true;
-              }
+              baseAI.fullVision = true;
+              baseAI.neverRetaliateFriendlies = true;
             }
-          };
-          DirectorCore.instance.TrySpawnObject(directorSpawnRequest);
-        }
-        orig(self);
+          }
+        };
+        DirectorCore.instance.TrySpawnObject(directorSpawnRequest);
       }
+      orig(self);
     }
 
     private void TrueDeathState_OnEnter(On.EntityStates.BrotherMonster.TrueDeathState.orig_OnEnter orig, TrueDeathState self)

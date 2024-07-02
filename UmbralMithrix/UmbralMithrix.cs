@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.3.3")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.3.4")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -91,7 +91,6 @@ namespace UmbralMithrix
     public static GameObject leftUltLine = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateLeft.prefab").WaitForCompletion();
     public static GameObject rightUltLine = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateRight.prefab").WaitForCompletion();
     public static GameObject staticUltLine = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateLeft.prefab").WaitForCompletion(), "StaticUltLine");
-    public static GameObject voidling = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidRaidCrab/MiniVoidRaidCrabBodyPhase3.prefab").WaitForCompletion(), "InactiveVoidling");
     public static Material preBossMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Brother/matBrotherPreBossSphere.mat").WaitForCompletion();
     public static Material arenaWallMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/moon/matMoonArenaWall.mat").WaitForCompletion();
     public static Material stealAuraMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Brother/matBrotherStealAura.mat").WaitForCompletion();
@@ -107,7 +106,6 @@ namespace UmbralMithrix
 
     public void Awake()
     {
-      mithrixHurt.AddComponent<P4Controller>();
       leapIndicatorPrefab.AddComponent<NetworkIdentity>();
       mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "CastUlt").First().requiredSkill = null;
       //  mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "Sprint after Target").First().minDistance = 25f;
@@ -130,8 +128,6 @@ namespace UmbralMithrix
       rightUltLine.GetComponent<RotateAroundAxis>().fastRotationSpeed = 21f;
       leftUltLine.GetComponent<RotateAroundAxis>().slowRotationSpeed = 21f;
       rightUltLine.GetComponent<RotateAroundAxis>().slowRotationSpeed = 21f;
-      firePillar.transform.localScale = new Vector3(2f, 2f, 2f);
-      firePillarGhost.transform.localScale = new Vector3(2f, 2f, 2f);
 
       lunarMissile.GetComponent<ProjectileSteerTowardTarget>().rotationSpeed = 30f;
       ProjectileDirectionalTargetFinder targetFinder = lunarMissile.GetComponent<ProjectileDirectionalTargetFinder>();
@@ -146,7 +142,6 @@ namespace UmbralMithrix
 
       ModConfig.InitConfig(Config);
       CreateDoppelItem();
-      P4DeathOrbSetup();
       MiscSetup();
       AddContent();
       MiscHooks miscHooks = new MiscHooks();
@@ -155,22 +150,6 @@ namespace UmbralMithrix
       MithrixMiscHooks mithrixMiscHooks = new MithrixMiscHooks();
 
       On.RoR2.UI.LogBook.LogBookPage.SetEntry += AddLogbookButtons;
-    }
-
-    private void P4DeathOrbSetup()
-    {
-      UmbralMithrix.voidling.transform.GetChild(0).gameObject.SetActive(false);
-      List<Material> materials = new List<Material>()
-      {
-        UmbralMithrix.preBossMat,
-        UmbralMithrix.arenaWallMat,
-        UmbralMithrix.stealAuraMat
-      };
-      UmbralMithrix.voidling.transform.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().SetMaterials(materials);
-      UmbralMithrix.voidling.GetComponent<SphereZone>().radius = 275f;
-      FogDamageController component = UmbralMithrix.voidling.GetComponent<FogDamageController>();
-      component.healthFractionPerSecond = 0.01f;
-      component.healthFractionRampCoefficientPerSecond = 2.5f;
     }
 
     private void MiscSetup()

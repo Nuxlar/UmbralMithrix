@@ -2,21 +2,16 @@ using EntityStates;
 using EntityStates.BrotherMonster;
 using EntityStates.BrotherMonster.Weapon;
 using EntityStates.Destructible;
-using HG;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using RoR2;
 using RoR2.CharacterAI;
-using RoR2.Networking;
 using RoR2.Projectile;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
-using RoR2.CharacterSpeech;
 
 namespace UmbralMithrix
 {
@@ -39,14 +34,6 @@ namespace UmbralMithrix
       On.EntityStates.FrozenState.OnEnter += FrozenState_OnEnter;
       On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += AddTimedBuff_BuffDef_float;
       On.EntityStates.Destructible.TimeCrystalDeath.OnEnter += RemoveUmbralImmune;
-      On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
-    }
-
-    private bool ItemStealController_BrotherItemFilter(
-       On.RoR2.ItemStealController.orig_BrotherItemFilter orig,
-       ItemIndex itemIndex)
-    {
-      return false;
     }
 
     private void RemoveUmbralImmune(On.EntityStates.Destructible.TimeCrystalDeath.orig_OnEnter orig, TimeCrystalDeath self)
@@ -187,11 +174,6 @@ namespace UmbralMithrix
           GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
         }
       }
-      if (body && hc && (body.name == "BrotherHurtBody(Clone)" || body.name == "InactiveVoidling(Clone)") && PhaseCounter.instance.phase == 4)
-      {
-        if (!UmbralMithrix.finishedItemSteal)
-          damageInfo.rejected = true;
-      }
       orig(self, damageInfo);
     }
 
@@ -227,12 +209,7 @@ namespace UmbralMithrix
       }
       if (!(body.name == "BrotherHurtBody(Clone)") || PhaseCounter.instance.phase != 4)
         return;
-      body.levelMoveSpeed = 0;
-      body.baseMoveSpeed = 0;
-      if (ModConfig.purpleMithrix.Value)
-        body.inventory.GiveItem(UmbralMithrix.UmbralItem);
-      body.AddBuff(RoR2Content.Buffs.Immune);
-      body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
+      body.healthComponent.Suicide();
     }
 
 
@@ -249,20 +226,6 @@ namespace UmbralMithrix
       if (UmbralMithrix.practiceModeEnabled && !self.IsExtraLifePendingServer() && PhaseCounter.instance)
       {
         self.RespawnExtraLife();
-        if (PhaseCounter.instance.phase == 4)
-        {
-          List<CharacterBody> bodies = new();
-          foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
-          {
-            if (cm.teamIndex == TeamIndex.Player)
-            {
-              CharacterBody cb = cm.GetBody();
-              if (cb && cb.isPlayerControlled)
-                bodies.Add(cb);
-            }
-          }
-          GameObject.Find("BrotherHurtBody(Clone)").GetComponent<P4Controller>().playerBodies = bodies;
-        }
       }
     }
 
@@ -402,31 +365,6 @@ namespace UmbralMithrix
       if (!(bool)(UnityEngine.Object)body.characterMotor)
         return;
       body.characterMotor.Motor.SetPositionAndRotation(newPosition, Quaternion.identity);
-    }
-
-    private void KillAllDrones()
-    {
-      int num = 0;
-      TeamIndex teamIndex = TeamIndex.Player;
-      foreach (CharacterMaster characterMaster in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
-      {
-        if (characterMaster.teamIndex == teamIndex)
-        {
-          CharacterBody body = characterMaster.GetBody();
-          if ((bool)(UnityEngine.Object)body && (bool)(UnityEngine.Object)body.healthComponent && body.name.Contains("Drone"))
-          {
-            body.healthComponent.Suicide();
-            ++num;
-          }
-        }
-      }
-      if (num <= 0)
-        return;
-      Debug.Log((object)string.Format("Killed {0} drones.", (object)num));
-      Chat.SendBroadcastChat((ChatMessageBase)new Chat.SimpleChatMessage()
-      {
-        baseToken = "<color=#c6d5ff><size=120%>Mithrix: Enough of your toys.</color></size>"
-      });
     }
   }
 }
