@@ -69,7 +69,7 @@ namespace UmbralMithrix
         c.Emit(OpCodes.Ldarg_0);
         c.EmitDelegate((IEnumerable<HurtBox> results, BaseAI instance) =>
         {
-          if (instance && (instance.body.name == "BrotherBody(Clone)" || instance.body.name == "BrotherGlassBody(Clone)" || instance.body.name == "BrotherHurtBody(Clone)"))
+          if (instance && (instance.body.name == "BrotherBody(Clone)" || instance.body.name == "BrotherGlassBody(Clone)" || instance.body.name == "BrotherHurtBodyP3(Clone)"))
           {
             // Filter results to only target players (don't target player allies like drones)
             IEnumerable<HurtBox> playerControlledTargets = results.Where(hurtBox =>
@@ -195,8 +195,7 @@ namespace UmbralMithrix
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
       if (body.name == "BrotherBody(Clone)")
       {
-        if (PhaseCounter.instance && PhaseCounter.instance.phase != 3)
-          body.gameObject.AddComponent<CloneController>();
+        body.gameObject.AddComponent<CloneController>();
         if (PhaseCounter.instance && PhaseCounter.instance.phase == 1)
         {
           ChildLocator component = SceneInfo.instance.GetComponent<ChildLocator>();

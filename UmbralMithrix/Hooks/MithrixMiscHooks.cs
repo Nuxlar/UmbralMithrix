@@ -8,6 +8,7 @@ using RoR2.CharacterAI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System;
 
 namespace UmbralMithrix
 {
@@ -82,6 +83,7 @@ namespace UmbralMithrix
 
     private void FistSlam_OnEnter(On.EntityStates.BrotherMonster.FistSlam.orig_OnEnter orig, FistSlam self)
     {
+      FistSlam.waveProjectileCount = 6;
       FistSlam.healthCostFraction = 0.0f;
       orig(self);
     }
@@ -90,7 +92,7 @@ namespace UmbralMithrix
     {
       if ((bool)PhaseCounter.instance)
       {
-        UltChannelState.waveProjectileCount = 0;
+        UltChannelState.waveProjectileCount = ModConfig.UltimateWaves.Value;
         List<CharacterBody> playerBodies = new();
         foreach (CharacterMaster cm in UnityEngine.Object.FindObjectsOfType<CharacterMaster>())
         {
@@ -104,9 +106,10 @@ namespace UmbralMithrix
         if (PhaseCounter.instance.phase == 2 && playerBodies.Count > 0)
         {
           float distance = 50f;
+          int sliceCount = (int)Math.Ceiling(ModConfig.UltimateWaves.Value / 1.5);
           float num = 360f / ModConfig.UltimateWaves.Value;
           Vector3 vector3 = Vector3.ProjectOnPlane(self.inputBank.aimDirection, Vector3.up);
-          Vector3 center = playerBodies[Random.Range(0, playerBodies.Count)].footPosition with
+          Vector3 center = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].footPosition with
           {
             y = 491f
           };
@@ -119,32 +122,34 @@ namespace UmbralMithrix
 
           for (int idx = 0; idx < 4; ++idx)
           {
-            float offset = Random.Range(-10f, 10f);
+            float offset = UnityEngine.Random.Range(-10f, 10f);
 
-            for (int index = 0; index < ModConfig.UltimateWaves.Value; ++index)
+            for (int index = 0; index < sliceCount; ++index)
             {
               Vector3 forward = Quaternion.AngleAxis((num + offset) * index, Vector3.up) * vector3;
               ProjectileManager.instance.FireProjectile(UmbralMithrix.staticUltLine, points[idx], Util.QuaternionSafeLookRotation(forward), self.gameObject, self.characterBody.damage * UltChannelState.waveProjectileDamageCoefficient, UltChannelState.waveProjectileForce, Util.CheckRoll(self.characterBody.crit, self.characterBody.master));
             }
           }
         }
-        if (PhaseCounter.instance.phase == 3)
+        if (PhaseCounter.instance.phase == 3 && playerBodies.Count > 0)
         {
+          UltChannelState.waveProjectileCount = 0;
           int count = PlayerCharacterMasterController.instances.Count;
           int num1 = ModConfig.UltimateWaves.Value;
           float num2 = 360f / num1;
           Vector3 normalized = Vector3.ProjectOnPlane(UnityEngine.Random.onUnitSphere, Vector3.up).normalized;
-          GameObject prefab = UmbralMithrix.leftUltLine;
-          if ((double)UnityEngine.Random.value <= 0.5)
-            prefab = UmbralMithrix.rightUltLine;
           PlayerCharacterMasterController instance = PlayerCharacterMasterController.instances[new System.Random().Next(0, count - 1)];
-          Vector3[] vector3Array = new Vector3[2]
+          Vector3[] vector3Array = new Vector3[3]
           {
-            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(-45f, -15f), 0.0f, UnityEngine.Random.Range(-45f, -15f)),
-            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(15f, 45f), 0.0f, UnityEngine.Random.Range(15f, 45f))
+            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(-50f, -20f), 0.0f, UnityEngine.Random.Range(-50f, -15f)),
+            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(20f, 50f), 0.0f, UnityEngine.Random.Range(20f, 50f)),
+            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(20f, 50f), 0.0f, UnityEngine.Random.Range(-20f, -50f))
           };
-          for (int index1 = 0; index1 < 2; ++index1)
+          for (int index1 = 0; index1 < 3; ++index1)
           {
+            GameObject prefab = UmbralMithrix.leftUltLine;
+            if ((double)UnityEngine.Random.value <= 0.5)
+              prefab = UmbralMithrix.rightUltLine;
             for (int index2 = 0; index2 < num1; ++index2)
             {
               Vector3 forward = Quaternion.AngleAxis(num2 * index2, Vector3.up) * normalized;

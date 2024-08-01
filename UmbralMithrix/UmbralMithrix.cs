@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.3.4")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.4.0")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -71,7 +71,9 @@ namespace UmbralMithrix
       }
     };
     public static ItemDef UmbralItem;
-    public static GameObject leapIndicatorPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Vagrant/VagrantNovaAreaIndicator.prefab").WaitForCompletion(), "UmbralLeapIndicator");
+    public static Material crushingLeapIndicatorMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Teleporters/matTeleporterRangeIndicator.mat").WaitForCompletion();
+    public static Material crushingLeapDangerIndicatorMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/artifactworld/matArtifactShellExplosionIndicator.mat").WaitForCompletion();
+    public static GameObject leapIndicatorPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Huntress/HuntressArrowRainIndicator.prefab").WaitForCompletion(), "UmbralLeapIndicator");
     public static GameObject leapIndicator;
     public static SpawnCard timeCrystalCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/WeeklyRun/bscTimeCrystal.asset").WaitForCompletion();
     public static GameObject mithrixMaster = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherMaster.prefab").WaitForCompletion();
@@ -84,8 +86,6 @@ namespace UmbralMithrix
     public static SpawnCard mithrixHurtCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Base/Brother/cscBrotherHurt.asset").WaitForCompletion();
     public static GameObject mithrixGlass = Addressables.LoadAssetAsync<GameObject>("RoR2/Junk/BrotherGlass/BrotherGlassBody.prefab").WaitForCompletion();
     public static SpawnCard mithrixGlassCard = Addressables.LoadAssetAsync<SpawnCard>("RoR2/Junk/BrotherGlass/cscBrotherGlass.asset").WaitForCompletion();
-    public static GameObject firePillar = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherFirePillar.prefab").WaitForCompletion();
-    public static GameObject firePillarGhost = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherFirePillarGhost.prefab").WaitForCompletion();
     public static GameObject leftP4Line = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateLeft.prefab").WaitForCompletion(), "P4UltLineLeft");
     public static GameObject rightP4Line = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateRight.prefab").WaitForCompletion(), "P4UltLineRight");
     public static GameObject leftUltLine = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Brother/BrotherUltLineProjectileRotateLeft.prefab").WaitForCompletion();
@@ -96,7 +96,6 @@ namespace UmbralMithrix
     public static Material stealAuraMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/Brother/matBrotherStealAura.mat").WaitForCompletion();
     public static Material moonMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/moon/matMoonBridge.mat").WaitForCompletion();
     public static Material doppelMat = Addressables.LoadAssetAsync<Material>("RoR2/Base/InvadingDoppelganger/matDoppelganger.mat").WaitForCompletion();
-    public static MeteorStormController meteorStormController = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Meteor/MeteorStorm.prefab").WaitForCompletion().GetComponent<MeteorStormController>();
     public static SpawnCard mithrixHurtP3Card = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     public static GameObject youngTeleporter = Addressables.LoadAssetAsync<GameObject>("RoR2/Junk/YoungTeleporter.prefab").WaitForCompletion();
     public static Transform practiceFire = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/bazaar/BazaarLight1Large Variant.prefab").WaitForCompletion(), "PracticeFire").transform.GetChild(0);
@@ -106,9 +105,10 @@ namespace UmbralMithrix
 
     public void Awake()
     {
-      leapIndicatorPrefab.AddComponent<NetworkIdentity>();
+      if (leapIndicatorPrefab.GetComponent<NetworkIdentity>() == null)
+        leapIndicatorPrefab.AddComponent<NetworkIdentity>();
+      leapIndicatorPrefab.transform.GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material = crushingLeapIndicatorMat;
       mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "CastUlt").First().requiredSkill = null;
-      //  mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "Sprint after Target").First().minDistance = 25f;
       mithrixHurtP3.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(StaggerEnter));
       mithrixHurtP3Master.GetComponent<CharacterMaster>().bodyPrefab = mithrixHurtP3;
       mithrixHurtP3Card.name = "cscBrotherHurtP3";
@@ -128,13 +128,6 @@ namespace UmbralMithrix
       rightUltLine.GetComponent<RotateAroundAxis>().fastRotationSpeed = 21f;
       leftUltLine.GetComponent<RotateAroundAxis>().slowRotationSpeed = 21f;
       rightUltLine.GetComponent<RotateAroundAxis>().slowRotationSpeed = 21f;
-
-      lunarMissile.GetComponent<ProjectileSteerTowardTarget>().rotationSpeed = 30f;
-      ProjectileDirectionalTargetFinder targetFinder = lunarMissile.GetComponent<ProjectileDirectionalTargetFinder>();
-      targetFinder.allowTargetLoss = false;
-      targetFinder.testLoS = true;
-      targetFinder.lookRange = 200f;
-      targetFinder.lookCone = 360f;
 
       AISkillDriver fireShards = mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "Sprint and FireLunarShards").First();
       fireShards.minDistance = 20f;
@@ -252,7 +245,7 @@ namespace UmbralMithrix
       skillDef3.baseRechargeInterval = ModConfig.UtilCD.Value;
       SkillDef skillDef4 = component.special.skillFamily.variants[0].skillDef;
       skillDef4.baseRechargeInterval = ModConfig.SpecialCD.Value;
-      // skillDef4.activationState = PlayerCharacterMasterController.instances.Count > 1 ? new SerializableEntityStateType(typeof(EnterSkyLeap)) : new SerializableEntityStateType(typeof(EnterCrushingLeap));
+      skillDef4.activationState = PlayerCharacterMasterController.instances.Count > 1 ? new SerializableEntityStateType(typeof(EnterSkyLeap)) : new SerializableEntityStateType(typeof(EnterCrushingLeap));
     }
 
     public static void AdjustPhase2Stats()
@@ -303,6 +296,9 @@ namespace UmbralMithrix
     private void AddContent()
     {
       ContentAddition.AddEntityState<GlassSpawnState>(out _);
+      ContentAddition.AddEntityState<EnterCrushingLeap>(out _);
+      ContentAddition.AddEntityState<EnterCrushingLeap>(out _);
+      ContentAddition.AddEntityState<AimCrushingLeap>(out _);
     }
 
     private void CreateDoppelItem()

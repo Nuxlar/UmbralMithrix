@@ -24,6 +24,20 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.4.0**
+
+- Difficulty update, since Umbral is now "too easy" because of Phase 4 being removed.
+- Re-adds Crushing Leap (leap that tracks until the last second) - multiplayer will have the "normal" leap
+- Re-adds a central moving pizza to Phase 2
+- Reduces Phase 2 stationary pizza slices by 50%
+- Adds a third pizza to Phase 3
+- Adds glass clones to Phase 3
+- Clone lifetime changes each phase (P1 12s, P2 6s, P3 4s)
+- Increases base glass clone spawn distance 8m -> 12m (to hopefully prevent clipping)
+- Reduces orbs in P3 fist slam (8 -> 6)
+- Removes pitch spread from needles (only spreads left/right not up/down)
+- Fixes fire pillar not showing up
+
 **2.3.4**
 
 - Removes Phase 4 entirely

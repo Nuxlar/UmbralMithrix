@@ -18,7 +18,6 @@ namespace UmbralMithrix
 
     private void WeaponSlamOnEnter(On.EntityStates.BrotherMonster.WeaponSlam.orig_OnEnter orig, WeaponSlam self)
     {
-      WeaponSlam.pillarProjectilePrefab = WeaponSlam.waveProjectilePrefab;
       UmbralMithrix.hasfired = false;
       orig(self);
     }
@@ -68,7 +67,7 @@ namespace UmbralMithrix
         for (int index = 0; index < ModConfig.LunarShardAdd.Value; ++index)
         {
           ProjectileManager.instance.FireProjectile(fireProjectileInfo);
-          aimRay.direction = Util.ApplySpread(aimRay.direction, 0.0f, self.maxSpread * (float)(1.0 + 0.449999988079071 * (double)index), self.spreadYawScale * (float)(1.0 + 0.449999988079071 * (double)index), self.spreadPitchScale * (float)(1.0 + 0.449999988079071 * (double)index));
+          aimRay.direction = Util.ApplySpread(aimRay.direction, 0.0f, self.maxSpread * (float)(1.0 + 0.449999988079071 * (double)index), self.spreadYawScale * (float)(1.0 + 0.449999988079071 * (double)index), self.spreadPitchScale);
           fireProjectileInfo.rotation = Quaternion.LookRotation(aimRay.direction);
         }
       }
