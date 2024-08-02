@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.4.0")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.4.1")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -120,10 +120,10 @@ namespace UmbralMithrix
       ContentAddition.AddBody(mithrixHurtP3);
       ContentAddition.AddMaster(mithrixHurtP3Master);
       Destroy(staticUltLine.GetComponent<RotateAroundAxis>());
-      leftP4Line.GetComponent<RotateAroundAxis>().fastRotationSpeed = 10f;
-      rightP4Line.GetComponent<RotateAroundAxis>().fastRotationSpeed = 10f;
-      leftP4Line.GetComponent<RotateAroundAxis>().slowRotationSpeed = 10f;
-      rightP4Line.GetComponent<RotateAroundAxis>().slowRotationSpeed = 10f;
+      leftP4Line.GetComponent<RotateAroundAxis>().fastRotationSpeed = 25f;
+      rightP4Line.GetComponent<RotateAroundAxis>().fastRotationSpeed = 25f;
+      leftP4Line.GetComponent<RotateAroundAxis>().slowRotationSpeed = 25f;
+      rightP4Line.GetComponent<RotateAroundAxis>().slowRotationSpeed = 25f;
       leftUltLine.GetComponent<RotateAroundAxis>().fastRotationSpeed = 21f;
       rightUltLine.GetComponent<RotateAroundAxis>().fastRotationSpeed = 21f;
       leftUltLine.GetComponent<RotateAroundAxis>().slowRotationSpeed = 21f;

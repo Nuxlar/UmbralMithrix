@@ -24,6 +24,12 @@ You can edit config values in-game and during runs through Settings -> Mod Optio
 
 ## Changelog
 
+**2.4.1**
+
+- Removes P3 third pizza
+- Reduces P3 pizza max spawn distance (45m -> 40m)
+- Increases P3 pizza speed (21 -> 25) Vanilla pizza has a max speed of 30
+
 **2.4.0**
 
 - Difficulty update, since Umbral is now "too easy" because of Phase 4 being removed.

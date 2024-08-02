@@ -139,17 +139,16 @@ namespace UmbralMithrix
           float num2 = 360f / num1;
           Vector3 normalized = Vector3.ProjectOnPlane(UnityEngine.Random.onUnitSphere, Vector3.up).normalized;
           PlayerCharacterMasterController instance = PlayerCharacterMasterController.instances[new System.Random().Next(0, count - 1)];
-          Vector3[] vector3Array = new Vector3[3]
+          GameObject prefab = UmbralMithrix.leftP4Line;
+          if ((double)UnityEngine.Random.value <= 0.5)
+            prefab = UmbralMithrix.rightP4Line;
+          Vector3[] vector3Array = new Vector3[2]
           {
-            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(-50f, -20f), 0.0f, UnityEngine.Random.Range(-50f, -15f)),
-            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(20f, 50f), 0.0f, UnityEngine.Random.Range(20f, 50f)),
-            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(20f, 50f), 0.0f, UnityEngine.Random.Range(-20f, -50f))
+            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(-40f, -15f), 0.0f, UnityEngine.Random.Range(-40f, -15f)),
+            new Vector3(instance.body.footPosition.x, self.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(15f, 40f), 0.0f, UnityEngine.Random.Range(15f, 40f)),
           };
-          for (int index1 = 0; index1 < 3; ++index1)
+          for (int index1 = 0; index1 < 2; ++index1)
           {
-            GameObject prefab = UmbralMithrix.leftUltLine;
-            if ((double)UnityEngine.Random.value <= 0.5)
-              prefab = UmbralMithrix.rightUltLine;
             for (int index2 = 0; index2 < num1; ++index2)
             {
               Vector3 forward = Quaternion.AngleAxis(num2 * index2, Vector3.up) * normalized;
