@@ -12,6 +12,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Collections;
 
 namespace UmbralMithrix
 {
@@ -34,6 +35,14 @@ namespace UmbralMithrix
       On.EntityStates.FrozenState.OnEnter += FrozenState_OnEnter;
       On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += AddTimedBuff_BuffDef_float;
       On.EntityStates.Destructible.TimeCrystalDeath.OnEnter += RemoveUmbralImmune;
+      On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
+    }
+
+    private bool ItemStealController_BrotherItemFilter(
+      On.RoR2.ItemStealController.orig_BrotherItemFilter orig,
+      ItemIndex itemIndex)
+    {
+      return false;
     }
 
     private void RemoveUmbralImmune(On.EntityStates.Destructible.TimeCrystalDeath.orig_OnEnter orig, TimeCrystalDeath self)
@@ -69,7 +78,7 @@ namespace UmbralMithrix
         c.Emit(OpCodes.Ldarg_0);
         c.EmitDelegate((IEnumerable<HurtBox> results, BaseAI instance) =>
         {
-          if (instance && (instance.body.name == "BrotherBody(Clone)" || instance.body.name == "BrotherGlassBody(Clone)" || instance.body.name == "BrotherHurtBodyP3(Clone)"))
+          if (instance && (instance.body.name == "BrotherBody(Clone)" || instance.body.name == "BrotherGlassBody(Clone)" || instance.body.name == "BrotherHurtBody(Clone)"))
           {
             // Filter results to only target players (don't target player allies like drones)
             IEnumerable<HurtBox> playerControlledTargets = results.Where(hurtBox =>
@@ -195,7 +204,8 @@ namespace UmbralMithrix
         self.inventory.GiveItemString(UmbralMithrix.UmbralItem.name);
       if (body.name == "BrotherBody(Clone)")
       {
-        body.gameObject.AddComponent<CloneController>();
+        if (PhaseCounter.instance && PhaseCounter.instance.phase != 3)
+          body.gameObject.AddComponent<CloneController>();
         if (PhaseCounter.instance && PhaseCounter.instance.phase == 1)
         {
           ChildLocator component = SceneInfo.instance.GetComponent<ChildLocator>();
@@ -206,9 +216,19 @@ namespace UmbralMithrix
             GameObject.Destroy(child.gameObject);
         }
       }
-      if (!(body.name == "BrotherHurtBody(Clone)") || PhaseCounter.instance.phase != 4)
-        return;
-      body.healthComponent.Suicide();
+      if (body.name == "BrotherHurtBody(Clone)" && PhaseCounter.instance.phase == 4)
+      {
+        if (ModConfig.skipPhase4.Value)
+          body.healthComponent.Suicide();
+        else
+        {
+          body.levelMoveSpeed = 0;
+          body.baseMoveSpeed = 0;
+          body.inventory.GiveItem(UmbralMithrix.UmbralItem);
+          body.AddBuff(RoR2Content.Buffs.Immune);
+          body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
+        }
+      }
     }
 
 
@@ -298,14 +318,15 @@ namespace UmbralMithrix
       orig(self);
     }
 
-    private void Stage_Start(On.RoR2.Stage.orig_Start orig, Stage self)
+    private IEnumerator Stage_Start(On.RoR2.Stage.orig_Start orig, Stage self)
     {
-      orig(self);
-      if (!(self.sceneDef.cachedName == "moon2"))
-        return;
-      UmbralMithrix.ArenaSetup();
-      UmbralMithrix.SpawnPracticeModeShrine();
-      UmbralMithrix.mithrix.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(ThroneSpawnState));
+      yield return orig(self);
+      if (self.sceneDef.cachedName == "moon2")
+      {
+        UmbralMithrix.ArenaSetup();
+        UmbralMithrix.SpawnPracticeModeShrine();
+        UmbralMithrix.mithrix.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(ThroneSpawnState));
+      }
     }
 
     private void PurchaseInteraction_OnInteractionBegin(

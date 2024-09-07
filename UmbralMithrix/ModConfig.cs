@@ -9,6 +9,8 @@ namespace UmbralMithrix
   internal class ModConfig
   {
     public static ConfigEntry<bool> purpleArena;
+    public static ConfigEntry<bool> skipPhase4;
+    public static ConfigEntry<bool> addShockwave;
     public static ConfigEntry<bool> purpleMithrix;
     public static ConfigEntry<float> basehealth;
     public static ConfigEntry<float> levelhealth;
@@ -44,6 +46,8 @@ namespace UmbralMithrix
     {
       ModConfig.purpleMithrix = config.Bind<bool>("General", "Purple Mithrix", true, "Adds umbral effects to Mithrix (purple when spawning in).");
       ModConfig.purpleArena = config.Bind<bool>("General", "Purple Arena", false, "Adds swirling purple walls/ceiling to the arena. Applies at the start of the fight.");
+      ModConfig.skipPhase4 = config.Bind<bool>("General", "Skip Phase 4", false, "Skips Phase 4. Applies at the start of the fight.");
+      ModConfig.addShockwave = config.Bind<bool>("General", "Add shockwave to Hammer Swipe", false, "Adds a 1 shockwave when Mithrix swipes. Applies at the start of the fight.");
 
       ModConfig.basehealth = config.Bind<float>("Stats", "Base Health", 1000f, "Vanilla: 1000");
       ModConfig.levelhealth = config.Bind<float>("Stats", "Level Health", 325f, "Health gained per level. Vanilla: 300");
@@ -78,6 +82,8 @@ namespace UmbralMithrix
       ModConfig.ShardCone = config.Bind<float>("Skill Mods", "Shard Cone", 120f, "Cone (Angle) in which shards look for targets. Vanilla: 90");
 
       ModSettingsManager.AddOption(new CheckBoxOption(ModConfig.purpleArena));
+      ModSettingsManager.AddOption(new CheckBoxOption(ModConfig.skipPhase4));
+      ModSettingsManager.AddOption(new CheckBoxOption(ModConfig.addShockwave));
 
       ModSettingsManager.AddOption(new StepSliderOption(ModConfig.basehealth, new StepSliderConfig()
       {
