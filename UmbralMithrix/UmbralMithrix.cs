@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 namespace UmbralMithrix
 {
-  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.5.0")]
+  [BepInPlugin("com.Nuxlar.UmbralMithrix", "UmbralMithrix", "2.5.1")]
   [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
   [BepInDependency(LanguageAPI.PluginGUID)]
   [BepInDependency(PrefabAPI.PluginGUID)]
@@ -144,8 +144,6 @@ namespace UmbralMithrix
       PrimaryHooks primaryHooks = new PrimaryHooks();
       MissionHooks missionHooks = new MissionHooks();
       MithrixMiscHooks mithrixMiscHooks = new MithrixMiscHooks();
-
-      On.RoR2.UI.LogBook.LogBookPage.SetEntry += AddLogbookButtons;
     }
 
     private void P4DeathOrbSetup()
@@ -343,65 +341,5 @@ namespace UmbralMithrix
       ContentAddition.AddItemDef(UmbralItem);
     }
 
-    private void AddLogbookButtons(On.RoR2.UI.LogBook.LogBookPage.orig_SetEntry orig, RoR2.UI.LogBook.LogBookPage self, UserProfile userProfile, RoR2.UI.LogBook.Entry entry)
-    {
-      orig(self, userProfile, entry);
-      if (entry.modelPrefab && entry.modelPrefab.name == "PickupUmbralCore")
-      {
-        if (!self.transform.gameObject.GetComponent<LogbookButtonAdder>())
-          self.transform.gameObject.AddComponent<LogbookButtonAdder>();
-        else
-        {
-          foreach (Transform child in self.transform)
-          {
-            if (child.name == "NakedButton (Back)(Clone)" && !child.gameObject.activeSelf)
-              child.gameObject.SetActive(true);
-          }
-        }
-      }
-      else
-      {
-        foreach (Transform child in self.transform)
-        {
-          if (child.name == "NakedButton (Back)(Clone)" && child.gameObject.activeSelf)
-            child.gameObject.SetActive(false);
-        }
-      }
-    }
-
-    public class LogbookButton : MonoBehaviour
-    {
-      public HGButton hgButton;
-
-      public void Start()
-      {
-        this.hgButton = this.GetComponent<HGButton>();
-        this.hgButton.onClick = new Button.ButtonClickedEvent();
-        this.hgButton.onClick.AddListener(() =>
-        {
-          Util.PlaySound("Play_UI_menuClick", RoR2Application.instance.gameObject);
-          if (this.GetComponent<LanguageTextMeshController>().token == "Play Entry")
-            Util.PlaySound("Play_UmbralLore", RoR2Application.instance.gameObject);
-          else
-            Util.PlaySound("Stop_UmbralLore", RoR2Application.instance.gameObject);
-        });
-      }
-    }
-
-    public class LogbookButtonAdder : MonoBehaviour
-    {
-      public void Start()
-      {
-        GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.transform.Find("NakedButton (Back)").gameObject, this.transform);
-        gameObject.AddComponent<LogbookButton>();
-        gameObject.GetComponent<LanguageTextMeshController>().token = "Play Entry";
-        gameObject.transform.localPosition = new Vector3(-650f, -486f, 0f);
-
-        gameObject = UnityEngine.Object.Instantiate<GameObject>(this.transform.Find("NakedButton (Back)").gameObject, this.transform);
-        gameObject.AddComponent<LogbookButton>();
-        gameObject.GetComponent<LanguageTextMeshController>().token = "Stop Entry";
-        gameObject.transform.localPosition = new Vector3(-435f, -486f, 0f);
-      }
-    }
   }
 }
