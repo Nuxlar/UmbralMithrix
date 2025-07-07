@@ -56,17 +56,8 @@ public class ExitUmbralLeap : BaseState
         GenericSkill special = (bool)this.skillLocator ? this.skillLocator.special : null;
         if (!(bool)special)
             return;
+
         special.SetSkillOverride(this.outer, ChannelUmbralUlt.replacementSkillDef, GenericSkill.SkillOverridePriority.Contextual);
-
-        if (PhaseCounter.instance && PhaseCounter.instance.phase == 2)
-            return;
-
-        GenericSkill genericSkill = this.skillLocator ? this.skillLocator.special : null;
-        if (!genericSkill)
-            return;
-
-        ChannelUmbralUlt.replacementSkillDef.activationState = new SerializableEntityStateType(typeof(UltEnterState));
-        genericSkill.SetSkillOverride(this.outer, ChannelUmbralUlt.replacementSkillDef, GenericSkill.SkillOverridePriority.Contextual);
     }
 
     private void FireRingAuthority()

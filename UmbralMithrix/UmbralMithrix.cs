@@ -15,6 +15,9 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using BepInEx.Bootstrap;
+using HG;
+using System;
+using UmbralMithrix.Components;
 
 namespace UmbralMithrix
 {
@@ -26,7 +29,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.4";
+        public const string PluginVersion = "2.5.6";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -477,85 +480,191 @@ namespace UmbralMithrix
                 characterMotor.airControl = ModConfig.aircontrol.Value;
                 characterDirection.turnSpeed = ModConfig.turningspeed.Value;
 
-                // TODO: Fix the glass body properly
-                Transform mdlBrother = mithrixGlass.transform.Find("ModelBase/mdlBrother");
-                GameObject mesh = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.mdlBrother_fbx).WaitForCompletion();
-
-                if (mdlBrother)
+                Transform modelTransform = null;
+                if (mithrixGlass.TryGetComponent(out ModelLocator modelLocator))
                 {
-                    if (mdlBrother.TryGetComponent<ModelSkinController>(out var modelSkinController))
+                    modelTransform = modelLocator.modelTransform;
+                }
+
+                if (modelTransform)
+                {
+                    SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
+
+                    ModelSkinController modelSkinController = modelTransform.gameObject.EnsureComponent<ModelSkinController>();
+                    int replacementSkinIndex = Array.IndexOf(modelSkinController.skins, originalSkin);
+
+                    SkinDef skinDef = Instantiate(originalSkin);
+                    skinDef.name = "skinBrotherGlassBodyDefault";
+                    Transform originalSkinRoot = skinDef.rootObject.transform;
+                    skinDef.rootObject = modelTransform.gameObject;
+
+                    (AssetReferenceT<SkinDefParams> paramsAddress, SkinDefParams paramsDirect) = skinDef.GetSkinParams();
+                    AssetOrDirectReference<SkinDefParams> skinDefParamsReference = new AssetOrDirectReference<SkinDefParams>
                     {
-                        UnityEngine.Object.DestroyImmediate(modelSkinController);
-                    }
-                    if (mdlBrother.TryGetComponent<Animator>(out var animator))
+                        address = paramsAddress,
+                        directRef = paramsDirect
+                    };
+
+                    SkinDefParams skinDefParams = Instantiate(skinDefParamsReference.WaitForCompletion());
+                    skinDefParams.name = $"{skinDef.name}_params";
+                    skinDef.skinDefParams = skinDefParams;
+                    skinDef.skinDefParamsAddress = new AssetReferenceT<SkinDefParams>(string.Empty);
+                    skinDef.optimizedSkinDefParams = skinDefParams;
+                    skinDef.optimizedSkinDefParamsAddress = new AssetReferenceT<SkinDefParams>(string.Empty);
+
+                    List<CharacterModel.RendererInfo> rendererInfos = [.. skinDefParams.rendererInfos];
+                    List<SkinDefParams.GameObjectActivation> gameObjectActivations = [.. skinDefParams.gameObjectActivations];
+                    List<SkinDefParams.MeshReplacement> meshReplacements = [.. skinDefParams.meshReplacements];
+                    List<CharacterModel.LightInfo> lightReplacements = [.. skinDefParams.lightReplacements];
+
+                    for (int i = rendererInfos.Count - 1; i >= 0; i--)
                     {
-                        animator.runtimeAnimatorController = Addressables.LoadAssetAsync<RuntimeAnimatorController>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.animBrother_controller).WaitForCompletion();
-                        animator.avatar = mesh.GetComponent<Animator>().avatar;
+                        CharacterModel.RendererInfo rendererInfo = rendererInfos[i];
+
+                        Renderer originalRenderer = rendererInfo.renderer;
+                        rendererInfo.renderer = null;
+                        if (originalRenderer && originalRenderer.transform.IsChildOf(originalSkinRoot))
+                        {
+                            string rendererPath = Util.BuildPrefabTransformPath(originalSkinRoot, originalRenderer.transform);
+
+                            if (!string.IsNullOrEmpty(rendererPath))
+                            {
+                                Transform rendererTransform = modelTransform.Find(rendererPath);
+                                if (rendererTransform)
+                                {
+                                    rendererInfo.renderer = rendererTransform.GetComponent(originalRenderer.GetType()) as Renderer;
+                                }
+                            }
+                        }
+
+                        if (rendererInfo.renderer)
+                        {
+                            switch (rendererInfo.renderer.name)
+                            {
+                                case "BrotherHammerConcrete":
+                                case "BrotherBodyMesh":
+                                    rendererInfo.defaultMaterial = null;
+                                    rendererInfo.defaultMaterialAddress = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.maBrotherGlassOverlay_mat);
+                                    break;
+                            }
+
+                            rendererInfos[i] = rendererInfo;
+                        }
+                        else
+                        {
+                            rendererInfos.RemoveAt(i);
+                        }
                     }
+
+                    for (int i = gameObjectActivations.Count - 1; i >= 0; i--)
+                    {
+                        SkinDefParams.GameObjectActivation gameObjectActivation = gameObjectActivations[i];
+
+                        GameObject originalObject = gameObjectActivation.gameObject;
+                        gameObjectActivation.gameObject = null;
+
+                        if (originalObject && originalObject.transform.IsChildOf(originalSkinRoot))
+                        {
+                            string objectPath = Util.BuildPrefabTransformPath(originalSkinRoot, originalObject.transform);
+
+                            if (!string.IsNullOrEmpty(objectPath))
+                            {
+                                Transform objectTransform = modelTransform.Find(objectPath);
+                                if (objectTransform)
+                                {
+                                    gameObjectActivation.gameObject = objectTransform.gameObject;
+                                }
+                            }
+                        }
+
+                        if (gameObjectActivation.gameObject)
+                        {
+                            gameObjectActivations[i] = gameObjectActivation;
+                        }
+                        else
+                        {
+                            gameObjectActivations.RemoveAt(i);
+                        }
+                    }
+
+                    for (int i = meshReplacements.Count - 1; i >= 0; i--)
+                    {
+                        SkinDefParams.MeshReplacement meshReplacement = meshReplacements[i];
+
+                        Renderer originalRenderer = meshReplacement.renderer;
+                        meshReplacement.renderer = null;
+
+                        if (originalRenderer && originalRenderer.transform.IsChildOf(originalSkinRoot))
+                        {
+                            string rendererPath = Util.BuildPrefabTransformPath(originalSkinRoot, originalRenderer.transform);
+
+                            if (!string.IsNullOrEmpty(rendererPath))
+                            {
+                                Transform rendererTransform = modelTransform.Find(rendererPath);
+                                if (rendererTransform)
+                                {
+                                    meshReplacement.renderer = rendererTransform.GetComponent(originalRenderer.GetType()) as Renderer;
+                                }
+                            }
+                        }
+
+                        if (meshReplacement.renderer)
+                        {
+                            meshReplacements[i] = meshReplacement;
+                        }
+                        else
+                        {
+                            meshReplacements.RemoveAt(i);
+                        }
+                    }
+
+                    for (int i = lightReplacements.Count - 1; i >= 0; i--)
+                    {
+                        CharacterModel.LightInfo lightReplacement = lightReplacements[i];
+
+                        Light originalLight = lightReplacement.light;
+                        lightReplacement.light = null;
+
+                        if (originalLight && originalLight.transform.IsChildOf(originalSkinRoot))
+                        {
+                            string lightPath = Util.BuildPrefabTransformPath(originalSkinRoot, originalLight.transform);
+                            if (!string.IsNullOrEmpty(lightPath))
+                            {
+                                Transform lightTransform = modelTransform.Find(lightPath);
+                                if (lightTransform)
+                                {
+                                    lightReplacement.light = lightTransform.GetComponent(originalLight.GetType()) as Light;
+                                }
+                            }
+                        }
+
+                        if (lightReplacement.light)
+                        {
+                            lightReplacements[i] = lightReplacement;
+                        }
+                        else
+                        {
+                            lightReplacements.RemoveAt(i);
+                        }
+                    }
+
+                    skinDefParams.rendererInfos = [.. rendererInfos];
+                    skinDefParams.gameObjectActivations = [.. gameObjectActivations];
+                    skinDefParams.meshReplacements = [.. meshReplacements];
+                    skinDefParams.lightReplacements = [.. lightReplacements];
+
+                    if (ArrayUtils.IsInBounds(modelSkinController.skins, replacementSkinIndex))
+                    {
+                        modelSkinController.skins[replacementSkinIndex] = skinDef;
+                    }
+                    else
+                    {
+                        ArrayUtils.ArrayAppend(ref modelSkinController.skins, skinDef);
+                    }
+
+                    PersistentOverlayController overlayController = modelTransform.gameObject.EnsureComponent<PersistentOverlayController>();
+                    overlayController.OverlayMaterialReference = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherGlassDistortion_mat);
                 }
-
-                Transform eye = mithrixGlass.transform.Find("ModelBase/mdlBrother/BrotherArmature/ROOT/base/stomach/chest/neck/head/eyeball/BrotherEye");
-                if (eye)
-                {
-                    eye.GetComponent<MeshFilter>().mesh = mesh.transform.Find("BrotherArmature/ROOT/base/stomach/chest/neck/head/eyeball/BrotherEye").GetComponent<MeshFilter>().mesh;
-                    eye.GetComponent<MeshRenderer>().material = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherEye_mat).WaitForCompletion();
-                }
-
-                Transform bodyMesh = mithrixGlass.transform.Find("ModelBase/mdlBrother/BrotherBodyMesh");
-                if (bodyMesh)
-                {
-                    bodyMesh.GetComponent<SkinnedMeshRenderer>().sharedMesh = mesh.transform.Find("BrotherBodyMesh").GetComponent<SkinnedMeshRenderer>().sharedMesh;
-                }
-
-                Transform hammerConcrete = mithrixGlass.transform.Find("ModelBase/mdlBrother/BrotherHammerConcrete");
-                if (hammerConcrete)
-                {
-                    hammerConcrete.GetComponent<SkinnedMeshRenderer>().sharedMesh = mesh.transform.Find("BrotherHammerConcrete").GetComponent<SkinnedMeshRenderer>().sharedMesh;
-                }
-
-                Transform hammerStib = mithrixGlass.transform.Find("ModelBase/mdlBrother/BrotherHammerConcrete/BrotherHammerStib");
-                if (hammerStib)
-                {
-                    SkinnedMeshRenderer hammerStibSMR = hammerStib.GetComponent<SkinnedMeshRenderer>();
-                    hammerStibSMR.sharedMesh = mesh.transform.Find("BrotherHammerConcrete/BrotherHammerStib").GetComponent<SkinnedMeshRenderer>().sharedMesh;
-                    hammerStibSMR.material = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherStib_mat).WaitForCompletion();
-                }
-
-                Transform stibPieces = mithrixGlass.transform.Find("ModelBase/mdlBrother/BrotherStibPieces");
-                if (stibPieces)
-                {
-                    SkinnedMeshRenderer hammerPiecesSMR = stibPieces.GetComponent<SkinnedMeshRenderer>();
-                    hammerPiecesSMR.sharedMesh = mesh.transform.Find("BrotherStibPieces").GetComponent<SkinnedMeshRenderer>().sharedMesh;
-                    hammerPiecesSMR.material = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherStib_mat).WaitForCompletion();
-                }
-                /*
-                SkinDef originalSkinDef = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
-                SkinDefParams originalParams = AssetAsyncReferenceManager<SkinDefParams>.LoadAsset(new AssetReferenceT<SkinDefParams>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother_skinBrotherBodyDefault.params_asset)).WaitForCompletion();
-                originalSkinDef.skinDefParams = originalParams;
-
-                Transform modelTransform = mithrixGlass.GetComponent<ModelLocator>().modelTransform;
-                DestroyImmediate(modelTransform.GetComponent<ModelSkinController>());
-
-                Material mat = AssetAsyncReferenceManager<Material>.LoadAsset(new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.maBrotherGlassOverlay_mat)).WaitForCompletion();
-                SkinDef newSkinDef = ScriptableObject.CreateInstance<SkinDef>();
-                SkinDefParams newParams = GameObject.Instantiate(originalParams);
-                ModelSkinController msc = modelTransform.gameObject.AddComponent<ModelSkinController>();
-                newSkinDef.skinDefParams = newParams;
-                newSkinDef.skinDefParamsAddress = new AssetReferenceT<SkinDefParams>("");
-                newSkinDef.rootObject = originalSkinDef.rootObject;
-                msc.skins = new SkinDef[1] { newSkinDef };
-                newParams.rendererInfos = HG.ArrayUtils.Clone(originalParams.rendererInfos);
-                newParams.meshReplacements = originalParams.meshReplacements;
-                newParams.projectileGhostReplacements = originalParams.projectileGhostReplacements;
-                newParams.gameObjectActivations = originalParams.gameObjectActivations;
-
-                for (int i = 0; i < newParams.rendererInfos.Length; i++)
-                {
-                    newParams.rendererInfos[i].defaultMaterial = mat;
-                }
-
-                HG.ArrayUtils.ArrayAppend(ref msc.skins, newSkinDef);
-                */
             };
             AssetReferenceT<GameObject> shardRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.LunarShardProjectile_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(shardRef).Completed += (x) =>

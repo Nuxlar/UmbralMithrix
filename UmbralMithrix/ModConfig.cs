@@ -1,10 +1,10 @@
+using BepInEx;
+using BepInEx.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using BepInEx;
-using BepInEx.Configuration;
 using UnityEngine;
 
 namespace UmbralMithrix
@@ -427,7 +427,7 @@ namespace UmbralMithrix
                 {
                     min = min,
                     max = max,
-                    formatString = "{0:0.00}",
+                    FormatString = "{0:0.00}",
                     restartRequired = restartRequired
                 }), UmbralMithrix.PluginGUID, UmbralMithrix.PluginName);
             }
@@ -450,7 +450,7 @@ namespace UmbralMithrix
                     increment = increment,
                     min = min,
                     max = max,
-                    formatString = "{0:0.00}",
+                    FormatString = "{0:0.00}",
                     restartRequired = restartRequired
                 }), UmbralMithrix.PluginGUID, UmbralMithrix.PluginName);
             }

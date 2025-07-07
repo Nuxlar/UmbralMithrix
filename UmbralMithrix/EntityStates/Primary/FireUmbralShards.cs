@@ -59,7 +59,12 @@ namespace UmbralMithrix.EntityStates
             this.PlayAnimation("Gesture, Override", FireUmbralShards.FireLunarShardsStateHash);
             base.AddRecoil(-0.4f * FireUmbralShards.recoilAmplitude, -0.8f * FireUmbralShards.recoilAmplitude, -0.3f * FireUmbralShards.recoilAmplitude, 0.3f * FireUmbralShards.recoilAmplitude);
             base.characterBody.AddSpreadBloom(FireUmbralShards.spreadBloomValue);
-            EffectManager.SimpleMuzzleFlash(FireUmbralShards.muzzleFlashEffectPrefab, base.gameObject, FireUmbralShards.muzzleString, false);
+
+            if (muzzleFlashEffectPrefab)
+            {
+                EffectManager.SimpleMuzzleFlash(FireUmbralShards.muzzleFlashEffectPrefab, base.gameObject, FireUmbralShards.muzzleString, false);
+            }
+
             Util.PlaySound(FireUmbralShards.fireSound, base.gameObject);
         }
 
