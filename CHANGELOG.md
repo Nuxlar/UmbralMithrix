@@ -2,6 +2,7 @@
 
 - Maintaining the mod again
 - Fixed occasional console error
+- Removed Umbral effect from glass clones for better visual clarity
 
 `Gorakh Versions`
 

@@ -240,7 +240,7 @@ namespace UmbralMithrix
                 self.inventory.GiveItem(RoR2Content.Items.AdaptiveArmor);
             }
 
-            if ((body.name == "BrotherBody(Clone)" || body.name == "BrotherGlassBody(Clone)") && ModConfig.purpleMithrix.Value)
+            if ((body.name == "BrotherBody(Clone)") && ModConfig.purpleMithrix.Value)
             {
                 self.inventory.GiveItem(UmbralMithrix.UmbralItem);
             }
