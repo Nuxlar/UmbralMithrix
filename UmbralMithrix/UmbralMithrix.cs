@@ -29,7 +29,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.6";
+        public const string PluginVersion = "2.5.7";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -488,7 +488,8 @@ namespace UmbralMithrix
 
                 if (modelTransform)
                 {
-                    SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
+                    SkinDef originalSkin = Addressables.LoadAssetAsync<SkinDef>("RoR2/Base/Brother/skinBrotherBodyDefault.asset").WaitForCompletion();
+                    //  SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
 
                     ModelSkinController modelSkinController = modelTransform.gameObject.EnsureComponent<ModelSkinController>();
                     int replacementSkinIndex = Array.IndexOf(modelSkinController.skins, originalSkin);

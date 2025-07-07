@@ -1,12 +1,13 @@
 ﻿{
   "name": "UmbralMithrixFork",
-  "author": "Gorakh",
-  "version_number": "2.5.6",
-  "website_url": "https://github.com/Goorakh/UmbralMithrix/issues",
+  "author": "Nuxlar",
+  "version_number": "2.5.7",
+  "website_url": "https://github.com/Nuxlar/UmbralMithrix/issues",
   "description": "A reworked Mithrix fight that uses new mechanics. Configurable.",
   "dependencies": [
     "Rune580-Risk_Of_Options-2.8.4",
     "RiskofThunder-R2API_ContentManagement-1.0.10",
-    "RiskofThunder-R2API_Prefab-1.0.4"
+    "RiskofThunder-R2API_Prefab-1.0.4",
+    "RiskofThunder-R2API_Language-1.0.1"
   ]
 }
