@@ -29,7 +29,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.7";
+        public const string PluginVersion = "2.5.8";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -142,11 +142,6 @@ namespace UmbralMithrix
             CloneAssets();
             SetupVoidling();
 
-            /*
-                P2 HP most likely
-                P3 Pizza being vanilla
-            */
-
             // TODO: actually make the skills and do this less lazily
             shardDef.activationState = new SerializableEntityStateType(typeof(FireUmbralShards));
             slamDef.activationState = new SerializableEntityStateType(typeof(UmbralHammerSlam));
@@ -197,6 +192,15 @@ namespace UmbralMithrix
                 if (throneTransform)
                 {
                     throneTransform.gameObject.SetActive(true);
+                }
+                Transform p2Transform = sceneInfo.transform.Find("BrotherMissionController/BrotherEncounter, Phase 2");
+                if (p2Transform)
+                {
+                    ScriptedCombatEncounter combatEncounter = p2Transform.GetComponent<ScriptedCombatEncounter>();
+                    if (combatEncounter)
+                    {
+                        combatEncounter.grantUniqueBonusScaling = true;
+                    }
                 }
             }
         }

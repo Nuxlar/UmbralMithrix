@@ -1,3 +1,10 @@
+`2.5.8`
+
+- Makes P3 immune clone unable to be targeted (missiles, engi harpoons, etc...)
+- Fixes P3 hammer slam firing orbs forward instead of waves
+- Fixes P2 Mithrix having significantly less HP than the other phases
+- Fixes thresholds (crystal spawns) being able to be bypassed with enough damage 
+
 `2.5.7`
 
 - Maintaining the mod again

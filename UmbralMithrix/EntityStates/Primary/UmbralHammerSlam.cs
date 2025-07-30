@@ -17,7 +17,8 @@ namespace UmbralMithrix.EntityStates
         public static string muzzleString = "SlamZone";
         public static GameObject slamImpactEffect = UmbralMithrix.umbralSlamImpact;
         public static float durationBeforePriorityReduces = 1.2f;
-        public static GameObject waveProjectilePrefab = UmbralMithrix.umbralSlamProjectile;
+        public static GameObject orbProjectilePrefab = UmbralMithrix.umbralSlamProjectile;
+        public static GameObject waveProjectilePrefab = UmbralMithrix.umbralLeapWave;
         public static float waveProjectileArc = 120f;
         public static int waveProjectileCount = 3;
         public static float waveProjectileDamageCoefficient = 2f;
@@ -110,7 +111,7 @@ namespace UmbralMithrix.EntityStates
                                 for (int index = 0; index < num1; ++index)
                                 {
                                     Vector3 forward = Quaternion.AngleAxis(num2 * index, Vector3.up) * vector3;
-                                    ProjectileManager.instance.FireProjectile(UmbralHammerSlam.waveProjectilePrefab, position, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.characterBody.damage * (UmbralHammerSlam.waveProjectileDamageCoefficient * 0.75f), UmbralHammerSlam.waveProjectileForce, Util.CheckRoll(this.characterBody.crit, this.characterBody.master));
+                                    ProjectileManager.instance.FireProjectile(UmbralHammerSlam.orbProjectilePrefab, position, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.characterBody.damage * (UmbralHammerSlam.waveProjectileDamageCoefficient * 0.75f), UmbralHammerSlam.waveProjectileForce, Util.CheckRoll(this.characterBody.crit, this.characterBody.master));
                                 }
                             }
                         }

@@ -195,32 +195,37 @@ namespace UmbralMithrix
         {
             CharacterBody body = self.body;
             HealthComponent hc = self;
-            if (body && hc && body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 2 && !UmbralMithrix.p2ThresholdReached)
+            if (PhaseCounter.instance)
             {
-                if (hc.health - damageInfo.damage <= hc.fullHealth * 0.75f)
+                bool flag = true;
+                if (body && hc && body.name == "BrotherBody(Clone)" && PhaseCounter.instance.phase == 2 && !UmbralMithrix.p2ThresholdReached)
                 {
-                    UmbralMithrix.p2ThresholdReached = true;
-                    P2ThresholdEvent(body.gameObject);
-                    hc.health = hc.fullHealth * 0.75f;
-                    damageInfo.rejected = true;
-                    GameObject.Find("BrotherBody(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
+                    if (hc.health - damageInfo.damage <= hc.fullHealth * 0.75f)
+                    {
+                        UmbralMithrix.p2ThresholdReached = true;
+                        P2ThresholdEvent(body.gameObject);
+                        hc.health = hc.fullHealth * 0.75f;
+                        GameObject.Find("BrotherBody(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
+                        flag = false;
+                    }
                 }
-            }
-
-            if (body && hc && body.name == "BrotherHurtBodyP3(Clone)" && PhaseCounter.instance.phase == 3 && !UmbralMithrix.p3ThresholdReached)
-            {
-                if (hc.health - damageInfo.damage <= hc.fullHealth * 0.75f)
+                if (body && hc && body.name == "BrotherHurtBodyP3(Clone)" && PhaseCounter.instance.phase == 3 && !UmbralMithrix.p3ThresholdReached)
                 {
-                    UmbralMithrix.p3ThresholdReached = true;
-                    GameObject.Find("BrotherBody(Clone)").GetComponent<HealthComponent>().health = 1f;
-                    P3ThresholdEvent(body.gameObject);
-                    hc.health = hc.fullHealth * 0.75f;
-                    damageInfo.rejected = true;
-                    GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
+                    if (hc.health - damageInfo.damage <= hc.fullHealth * 0.75f)
+                    {
+                        UmbralMithrix.p3ThresholdReached = true;
+                        GameObject.Find("BrotherBody(Clone)").GetComponent<HealthComponent>().health = 1f;
+                        P3ThresholdEvent(body.gameObject);
+                        hc.health = hc.fullHealth * 0.75f;
+                        GameObject.Find("BrotherHurtBodyP3(Clone)").GetComponent<CharacterBody>().AddBuff(RoR2Content.Buffs.Immune);
+                        flag = false;
+                    }
                 }
+                if (flag)
+                    orig(self, damageInfo);
             }
-
-            orig(self, damageInfo);
+            else
+                orig(self, damageInfo);
         }
 
         private void CharacterMaster_OnBodyStart(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
@@ -247,12 +252,7 @@ namespace UmbralMithrix
 
             if (body.name == "BrotherBody(Clone)")
             {
-                if (PhaseCounter.instance && PhaseCounter.instance.phase != 3)
-                {
-                    body.gameObject.AddComponent<CloneController>();
-                }
-
-                if (PhaseCounter.instance && PhaseCounter.instance.phase == 1)
+                if (PhaseCounter.instance.phase == 1)
                 {
                     ChildLocator component = SceneInfo.instance.GetComponent<ChildLocator>();
                     if (component)
@@ -263,6 +263,10 @@ namespace UmbralMithrix
                             GameObject.Destroy(child.gameObject);
                         }
                     }
+                }
+                if (PhaseCounter.instance.phase != 3)
+                {
+                    body.gameObject.AddComponent<CloneController>();
                 }
             }
 

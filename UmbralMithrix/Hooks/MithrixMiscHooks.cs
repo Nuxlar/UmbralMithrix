@@ -86,6 +86,7 @@ namespace UmbralMithrix
                 {
                     CharacterMaster master = spawnResult.spawnedInstance.GetComponent<CharacterMaster>();
                     master.GetBody().AddBuff(RoR2Content.Buffs.Immune);
+                    master.GetBody().AddBuff(RoR2Content.Buffs.Intangible);
                     foreach (BaseAI baseAI in master.GetComponents<BaseAI>())
                     {
                         if (baseAI)
