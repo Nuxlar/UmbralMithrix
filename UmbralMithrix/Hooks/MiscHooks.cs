@@ -34,37 +34,6 @@ namespace UmbralMithrix
             On.RoR2.CharacterBody.AddTimedBuff_BuffDef_float += AddTimedBuff_BuffDef_float;
             On.EntityStates.Destructible.TimeCrystalDeath.OnEnter += RemoveUmbralImmune;
             On.RoR2.ItemStealController.BrotherItemFilter += ItemStealController_BrotherItemFilter;
-            // IL.RoR2.TetherVfxOrigin.AddTether += TetherVfxOrigin_AddTether;
-        }
-
-        static void TetherVfxOrigin_AddTether(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-
-            if (!c.TryGotoNext(MoveType.After, x => x.MatchLdfld<TetherVfxOrigin>(nameof(TetherVfxOrigin.onTetherAdded))))
-            {
-                Log.Error("Failed to find onTetherAdded field load");
-                return;
-            }
-
-            c.Emit(OpCodes.Dup);
-
-            ILLabel skipInvokeLabel = c.DefineLabel();
-            c.Emit(OpCodes.Brfalse, skipInvokeLabel);
-
-            if (!c.TryGotoNext(MoveType.After, x => x.MatchCallOrCallvirt<TetherVfxOrigin.TetherAddDelegate>("Invoke")))
-            {
-                Log.Error("Failed to find onTetherAdded Invoke call");
-                return;
-            }
-
-            ILLabel skipPopLabel = c.DefineLabel();
-            c.Emit(OpCodes.Br, skipPopLabel);
-
-            c.Emit(OpCodes.Pop);
-            skipInvokeLabel.Target = c.Prev;
-
-            c.MarkLabel(skipPopLabel);
         }
 
         private bool ItemStealController_BrotherItemFilter(On.RoR2.ItemStealController.orig_BrotherItemFilter orig, ItemIndex itemIndex)
@@ -218,7 +187,7 @@ namespace UmbralMithrix
                         UmbralMissionController.instance.p3ThresholdReached = true;
                         UmbralMissionController.instance.p3CloneBody.GetComponent<HealthComponent>().health = 1f;
                         P3ThresholdEvent(body.gameObject);
-                        hc.health = hc.fullHealth * 0.25f;
+                        hc.health = hc.fullHealth * 0.75f;
                         UmbralMissionController.instance.currentPhaseBody.AddBuff(RoR2Content.Buffs.Immune);
                         damageReport.damageDealt = 1f;
                     }

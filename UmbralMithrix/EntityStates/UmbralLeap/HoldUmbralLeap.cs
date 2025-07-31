@@ -45,7 +45,6 @@ public class HoldUmbralLeap : BaseState
                         playerBodies.Add(cb);
                 }
             }
-            Debug.LogWarning(playerBodies.Count);
             if (playerBodies.Count > 0)
             {
                 Vector3 target = playerBodies[UnityEngine.Random.Range(0, playerBodies.Count)].footPosition;
@@ -58,9 +57,6 @@ public class HoldUmbralLeap : BaseState
                     this.characterMotor.Motor.SetPositionAndRotation(target, Quaternion.identity);
                 }
             }
-
-            Debug.LogWarning(UmbralMithrix.leapIndicatorPrefab);
-            Debug.LogWarning(this.characterBody.footPosition);
 
             GameObject workPls = GameObject.Instantiate(UmbralMithrix.leapIndicatorPrefab, this.characterBody.footPosition, Quaternion.identity);
             float radius = this.characterBody.radius / 2;

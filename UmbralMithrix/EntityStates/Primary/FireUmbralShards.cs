@@ -50,14 +50,15 @@ namespace UmbralMithrix.EntityStates
                 for (int index = 0; index < ModConfig.LunarShardAdd.Value; ++index)
                 {
                     ProjectileManager.instance.FireProjectile(fireProjectileInfo);
-                    aimRay.direction = Util.ApplySpread(aimRay.direction, 0.0f, this.maxSpread * (float)(1.0 + 0.449999988079071 * index), this.spreadYawScale * (float)(1.0 + 0.449999988079071 * index), this.spreadPitchScale * (float)(1.0 + 0.449999988079071 * index));
+                    aimRay.direction = Util.ApplySpread(aimRay.direction, 0.0f, this.maxSpread * (float)(1.0 + 0.449999988079071 * index), this.spreadYawScale * (float)(1.0 + 0.449999988079071 * index), this.spreadPitchScale);
                     fireProjectileInfo.rotation = Quaternion.LookRotation(aimRay.direction);
                 }
                 ProjectileManager.instance.FireProjectile(fireProjectileInfo);
             }
             this.PlayAnimation("Gesture, Additive", FireUmbralShards.FireLunarShardsStateHash);
             this.PlayAnimation("Gesture, Override", FireUmbralShards.FireLunarShardsStateHash);
-            base.AddRecoil(-0.4f * FireUmbralShards.recoilAmplitude, -0.8f * FireUmbralShards.recoilAmplitude, -0.3f * FireUmbralShards.recoilAmplitude, 0.3f * FireUmbralShards.recoilAmplitude);
+            base.AddRecoil(1, FireUmbralShards.recoilAmplitude, -0.3f * FireUmbralShards.recoilAmplitude, 0.3f * FireUmbralShards.recoilAmplitude);
+            // base.AddRecoil(0, 0, -0.3f * FireUmbralShards.recoilAmplitude, 0.3f * FireUmbralShards.recoilAmplitude);
             base.characterBody.AddSpreadBloom(FireUmbralShards.spreadBloomValue);
 
             if (muzzleFlashEffectPrefab)

@@ -36,7 +36,6 @@ namespace UmbralMithrix
                     if (body && PhaseCounter.instance)
                     {
                         string bodyName;
-                        Debug.LogWarning(PhaseCounter.instance.phase);
                         if (NetworkServer.active)
                             bodyName = PhaseCounter.instance.phase == 2 ? "BrotherBody(Clone)" : "BrotherHurtBodyP3(Clone)";
                         else

@@ -20,6 +20,13 @@ Practice mode just makes you respawn on death in case you want to learn/practice
 
 You can edit config values in-game and during runs through Settings -> Mod Options -> UmbralMithrix. Stats are calculated at the start of each phase so you can change in-game configs up until the phase starts. If the in-game values are too limiting you can edit the modman config to input custom values.
 
+### Known Issues
+
+- Excessive screenshake (Turn down your screenshake intensity in the vanilla settings)
+- (multiplayer) Mithrix doesn't play his animation when doing pizza
+- (multiplayer) P3 tracking pizza only follows host
+- (multiplayer) Mithrix moonwalks in place during P4
+
 ## Credits
 
 - Gorakh for maintaining the mod while I was gone

@@ -1,7 +1,9 @@
 `2.5.9`
 
 - Actually fixes thresholds being able to be bypassed
-- Internal code improvements
+- Improves lunar shard firing angle (lunar shards should fire into the ground less)
+- Internal code improvements (should be more consistent in multiplayer)
+- Added known bugs to README
 - Multiplayer Fixes
     - Crystals now have the umbral overlay in mp
     - Crystal tethers now show up in mp
