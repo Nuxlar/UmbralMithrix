@@ -38,7 +38,6 @@ namespace UmbralMithrix.EntityStates
         public override void OnEnter()
         {
             base.OnEnter();
-            UmbralMithrix.hasfired = false;
             this.modelAnimator = base.GetModelAnimator();
             this.modelTransform = base.GetModelTransform();
             Util.PlayAttackSpeedSound(UmbralHammerSlam.attackSoundString, base.gameObject, this.attackSpeedStat);
@@ -99,20 +98,16 @@ namespace UmbralMithrix.EntityStates
                     EffectManager.SimpleMuzzleFlash(UmbralHammerSlam.slamImpactEffect, base.gameObject, UmbralHammerSlam.muzzleString, false);
                     if (base.isAuthority)
                     {
-                        if (!UmbralMithrix.hasfired)
+                        if (PhaseCounter.instance)
                         {
-                            UmbralMithrix.hasfired = true;
-                            if (PhaseCounter.instance)
+                            int num1 = ModConfig.SlamOrbProjectileCount.Value;
+                            float num2 = 360f / num1;
+                            Vector3 vector3 = Vector3.ProjectOnPlane(this.characterDirection.forward, Vector3.up);
+                            Vector3 position = this.FindModelChild(UmbralHammerSlam.muzzleString).position;
+                            for (int index = 0; index < num1; ++index)
                             {
-                                int num1 = ModConfig.SlamOrbProjectileCount.Value;
-                                float num2 = 360f / num1;
-                                Vector3 vector3 = Vector3.ProjectOnPlane(this.characterDirection.forward, Vector3.up);
-                                Vector3 position = this.FindModelChild(UmbralHammerSlam.muzzleString).position;
-                                for (int index = 0; index < num1; ++index)
-                                {
-                                    Vector3 forward = Quaternion.AngleAxis(num2 * index, Vector3.up) * vector3;
-                                    ProjectileManager.instance.FireProjectile(UmbralHammerSlam.orbProjectilePrefab, position, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.characterBody.damage * (UmbralHammerSlam.waveProjectileDamageCoefficient * 0.75f), UmbralHammerSlam.waveProjectileForce, Util.CheckRoll(this.characterBody.crit, this.characterBody.master));
-                                }
+                                Vector3 forward = Quaternion.AngleAxis(num2 * index, Vector3.up) * vector3;
+                                ProjectileManager.instance.FireProjectile(UmbralHammerSlam.orbProjectilePrefab, position, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.characterBody.damage * UmbralHammerSlam.waveProjectileDamageCoefficient, UmbralHammerSlam.waveProjectileForce, Util.CheckRoll(this.characterBody.crit, this.characterBody.master));
                             }
                         }
                         if (base.characterDirection)

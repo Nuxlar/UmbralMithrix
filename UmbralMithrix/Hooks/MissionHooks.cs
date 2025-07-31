@@ -21,10 +21,6 @@ namespace UmbralMithrix
 
         private void Phase1OnEnter(On.EntityStates.Missions.BrotherEncounter.Phase1.orig_OnEnter orig, Phase1 self)
         {
-            UmbralMithrix.spawnedClone = false;
-            UmbralMithrix.p2ThresholdReached = false;
-            UmbralMithrix.p3ThresholdReached = false;
-            UmbralMithrix.finishedItemSteal = false;
             UmbralMithrix.mithrix.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(ThroneSpawnState));
 
             GameObject escapeSequenceController = GameObject.Find("EscapeSequenceController");

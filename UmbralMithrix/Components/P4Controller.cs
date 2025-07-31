@@ -157,7 +157,8 @@ namespace UmbralMithrix
             if (!_trackedPlayers.Contains(playerBody))
             {
                 _trackedPlayers.Add(playerBody);
-                playerBody.AddBuff(RoR2Content.Buffs.TeamWarCry);
+                if (NetworkServer.active)
+                    playerBody.AddBuff(RoR2Content.Buffs.TeamWarCry);
             }
         }
     }

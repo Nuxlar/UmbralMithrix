@@ -35,7 +35,9 @@ namespace UmbralMithrix
 
         private void SpellChannelExitState_OnEnter(On.EntityStates.BrotherMonster.SpellChannelExitState.orig_OnEnter orig, SpellChannelExitState self)
         {
-            UmbralMithrix.finishedItemSteal = true;
+            if (UmbralMissionController.instance)
+                UmbralMissionController.instance.finishedItemSteal = true;
+
             self.characterBody.gameObject.GetComponent<P4Controller>().finishedItemSteal = true;
 
             bool killedAllies = false;
@@ -71,9 +73,9 @@ namespace UmbralMithrix
                 self.outer.SetNextState(new SpellChannelEnterState());
             }
 
-            if (PhaseCounter.instance && PhaseCounter.instance.phase == 3 && !UmbralMithrix.spawnedClone)
+            if (UmbralMissionController.instance && PhaseCounter.instance && PhaseCounter.instance.phase == 3 && UmbralMissionController.instance && !UmbralMissionController.instance.spawnedClone)
             {
-                UmbralMithrix.spawnedClone = true;
+                UmbralMissionController.instance.spawnedClone = true;
                 DirectorPlacementRule placementRule = new DirectorPlacementRule();
                 placementRule.placementMode = DirectorPlacementRule.PlacementMode.NearestNode;
                 placementRule.minDistance = 3f;
@@ -105,14 +107,16 @@ namespace UmbralMithrix
         private void TrueDeathState_OnEnter(On.EntityStates.BrotherMonster.TrueDeathState.orig_OnEnter orig, TrueDeathState self)
         {
             TrueDeathState.dissolveDuration = 3f;
-
-            if (!UmbralMithrix.practiceModeEnabled)
+            if (UmbralMissionController.instance)
             {
-                Vector3 velocity = (Vector3.up * 40f) + (Vector3.forward * 2f);
-                PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(UmbralMithrix.UmbralItem.itemIndex), self.characterBody.footPosition + (Vector3.up * 1.5f), velocity);
-            }
+                if (!UmbralMissionController.instance.practiceModeEnabled)
+                {
+                    Vector3 velocity = (Vector3.up * 40f) + (Vector3.forward * 2f);
+                    PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(UmbralMithrix.UmbralItem.itemIndex), self.characterBody.footPosition + (Vector3.up * 1.5f), velocity);
+                }
 
-            UmbralMithrix.practiceModeEnabled = false;
+                UmbralMissionController.instance.practiceModeEnabled = false;
+            }
             orig(self);
         }
     }

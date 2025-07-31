@@ -1,3 +1,11 @@
+`2.5.9`
+
+- Actually fixes thresholds being able to be bypassed
+- Internal code improvements
+- Multiplayer Fixes
+    - Crystals now have the umbral overlay in mp
+    - Crystal tethers now show up in mp
+
 `2.5.8`
 
 - Makes P3 immune clone unable to be targeted (missiles, engi harpoons, etc...)

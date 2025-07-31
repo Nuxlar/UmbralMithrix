@@ -34,14 +34,6 @@ namespace UmbralMithrix
         internal static UmbralMithrix Instance { get; private set; }
 
         public static bool RooInstalled => Chainloader.PluginInfos.ContainsKey("com.rune580.riskofoptions");
-        public static bool practiceModeEnabled;
-        public static bool hasfired;
-        public static bool spawnedClone = false;
-        public static bool finishedItemSteal = false;
-        public static bool p2ThresholdReached = false;
-        public static bool p3ThresholdReached = false;
-        public static List<GameObject> timeCrystals = new List<GameObject>();
-
         public static Dictionary<int, Vector3> p23PizzaPoints = new Dictionary<int, Vector3>()
         {
             {
@@ -61,27 +53,6 @@ namespace UmbralMithrix
                 new Vector3(-196f, 489.7f, -101f)
             }
         };
-
-        public static Dictionary<int, Vector3> p4PizzaPoints = new Dictionary<int, Vector3>()
-        {
-            {
-                0,
-                new Vector3(-175f, 489.7f, -0.08f)
-            },
-            {
-                1,
-                new Vector3(-0.08f, 489.7f, 0.08f)
-            },
-            {
-                2,
-                new Vector3(-91f, 489.7f, -89f)
-            },
-            {
-                3,
-                new Vector3(-89f, 489.7f, 89f)
-            }
-        };
-
         public static ItemDef UmbralItem;
 
         public static GameObject umbralSlamImpact;
@@ -96,7 +67,7 @@ namespace UmbralMithrix
 
         public static GameObject leapIndicatorPrefab;
         public static GameObject leapIndicator;
-        public static SpawnCard timeCrystalCard;
+        public static GameObject timeCrystal;
         public static GameObject lunarMissile;
         public static GameObject mithrixHurtP3Master;
         public static GameObject mithrix;
@@ -188,6 +159,12 @@ namespace UmbralMithrix
             SceneInfo sceneInfo = SceneInfo.instance;
             if (sceneInfo)
             {
+                Transform mithrixController = sceneInfo.transform.Find("BrotherMissionController");
+                if (mithrixController && NetworkServer.active)
+                {
+                    mithrixController.gameObject.AddComponent<UmbralMissionController>();
+                    Log.Debug("Added UmbralMissionController");
+                }
                 Transform throneTransform = sceneInfo.transform.Find("BrotherMissionController/BrotherEncounter, Phase 1/PhaseObjects/mdlBrotherThrone");
                 if (throneTransform)
                 {
@@ -682,8 +659,13 @@ namespace UmbralMithrix
                 component7.allowTargetLoss = true;
             };
 
-            AssetReferenceT<SpawnCard> crystalCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_WeeklyRun.bscTimeCrystal_asset);
-            AssetAsyncReferenceManager<SpawnCard>.LoadAsset(crystalCardRef).Completed += (x) => timeCrystalCard = x.Result;
+            AssetReferenceT<GameObject> crystalRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_WeeklyRun.TimeCrystalBody_prefab);
+            AssetAsyncReferenceManager<GameObject>.LoadAsset(crystalRef).Completed += (x) =>
+            {
+                GameObject crystal = x.Result;
+                timeCrystal = PrefabAPI.InstantiateClone(crystal, "UmbralCrystal");
+                timeCrystal.AddComponent<ArbitraryCrystalComponent>();
+            };
             AssetReferenceT<SpawnCard> mithrixCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.cscBrother_asset);
             AssetAsyncReferenceManager<SpawnCard>.LoadAsset(mithrixCardRef).Completed += (x) => mithrixCard = x.Result;
             AssetReferenceT<SpawnCard> mithrixHurtCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.cscBrotherHurt_asset);
