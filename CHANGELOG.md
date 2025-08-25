@@ -1,3 +1,7 @@
+`2.5.10`
+
+- Fixes potential incompat with other mod hooks (namely RiskofResource's Gauntlet mod)
+
 `2.5.9`
 
 - Actually fixes thresholds being able to be bypassed

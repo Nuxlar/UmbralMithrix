@@ -29,7 +29,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.9";
+        public const string PluginVersion = "2.5.10";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -163,7 +163,7 @@ namespace UmbralMithrix
                 if (mithrixController && NetworkServer.active)
                 {
                     mithrixController.gameObject.AddComponent<UmbralMissionController>();
-                    Log.Debug("Added UmbralMissionController");
+                    Log.Info("Added UmbralMissionController");
                 }
                 Transform throneTransform = sceneInfo.transform.Find("BrotherMissionController/BrotherEncounter, Phase 1/PhaseObjects/mdlBrotherThrone");
                 if (throneTransform)

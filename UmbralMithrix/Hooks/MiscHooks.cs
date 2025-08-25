@@ -280,7 +280,7 @@ namespace UmbralMithrix
             if (!body.isPlayerControlled)
                 return;
 
-            if (UmbralMissionController.instance.practiceModeEnabled && !self.IsExtraLifePendingServer() && PhaseCounter.instance)
+            if (UmbralMissionController.instance && UmbralMissionController.instance.practiceModeEnabled && !self.IsExtraLifePendingServer() && PhaseCounter.instance)
             {
                 self.RespawnExtraLife();
             }
