@@ -1,3 +1,8 @@
+`2.5.12`
+
+- Fixes error spam if survivor respawns during the fight
+- Glass clone orb spawn is now a separate skill and they can hammer swipe again
+
 `2.5.11`
 
 - Removes the large glowy particles from majority of the fight, only show up in P4 now for less visual clutter

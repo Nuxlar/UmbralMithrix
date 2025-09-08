@@ -1,6 +1,6 @@
 ﻿{
   "name": "UmbralMithrix",
-  "version_number": "2.5.11",
+  "version_number": "2.5.12",
   "website_url": "https://github.com/Nuxlar/UmbralMithrix/issues",
   "description": "A reworked Mithrix fight that uses new mechanics. Configurable.",
   "dependencies": [

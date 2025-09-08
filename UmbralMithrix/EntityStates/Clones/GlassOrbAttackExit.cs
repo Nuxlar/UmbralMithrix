@@ -8,7 +8,7 @@ namespace UmbralMithrix.EntityStates
 {
     public class GlassOrbAttackExit : BaseState
     {
-        public static float duration = 2f;
+        public static float duration = 1f;
 
         private static int exitStateHash = Animator.StringToHash("UltExit");
         private static int exitParamHash = Animator.StringToHash("Ult.playbackRate");

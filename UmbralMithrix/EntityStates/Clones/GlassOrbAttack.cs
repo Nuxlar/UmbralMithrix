@@ -8,7 +8,7 @@ namespace UmbralMithrix.EntityStates
     public class GlassOrbAttack : BaseState
     {
         public static float duration = 0.2f;
-        public static float waitDuration = 3f;
+        public static float waitDuration = 2f;
         public static float damageCoefficient = 3.75f;
         public static float force = 1000f;
         public static string soundString = "Play_moonBrother_blueWall_slam_start";
@@ -33,12 +33,12 @@ namespace UmbralMithrix.EntityStates
             base.FixedUpdate();
             if ((double)this.fixedAge <= GlassOrbAttack.waitDuration)
                 return;
-            this.outer.SetNextState(new GlassOrbAttackExit());
+            this.outer.SetNextStateToMain();
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Death;
+            return InterruptPriority.PrioritySkill;
         }
     }
 }

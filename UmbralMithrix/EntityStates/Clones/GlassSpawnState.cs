@@ -1,4 +1,5 @@
 using EntityStates;
+using EntityStates.BrotherMonster;
 using EntityStates.LunarWisp;
 using RoR2;
 
@@ -36,7 +37,7 @@ namespace UmbralMithrix.EntityStates
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Death;
+            return InterruptPriority.PrioritySkill;
         }
     }
 }

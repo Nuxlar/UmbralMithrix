@@ -29,7 +29,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.11";
+        public const string PluginVersion = "2.5.12";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -453,6 +453,18 @@ namespace UmbralMithrix
                 SkillDef skillDef4 = skillLocator.special.skillFamily.variants[0].skillDef;
                 skillDef4.baseRechargeInterval = ModConfig.SpecialCD.Value;
             };
+            AssetReferenceT<GameObject> glassMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Junk_BrotherGlass.BrotherGlassMaster_prefab);
+            AssetAsyncReferenceManager<GameObject>.LoadAsset(glassMasterRef).Completed += (x) =>
+            {
+                GameObject prefab = x.Result;
+                List<AISkillDriver> drivers = prefab.GetComponents<AISkillDriver>().ToList();
+
+                foreach (AISkillDriver driver in drivers)
+                {
+                    if (driver.customName == "CastUlt")
+                        driver.requiredSkill = null;
+                }
+            };
             AssetReferenceT<GameObject> glassBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Junk_BrotherGlass.BrotherGlassBody_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(glassBodyRef).Completed += (x) =>
             {
@@ -477,10 +489,10 @@ namespace UmbralMithrix
 
                 skillDef.activationState = new SerializableEntityStateType(typeof(GlassOrbAttack));
                 skillDef.activationStateMachineName = "Body";
-                skillDef.interruptPriority = InterruptPriority.Death;
+                skillDef.interruptPriority = InterruptPriority.PrioritySkill;
 
                 skillDef.baseMaxStock = 1;
-                skillDef.baseRechargeInterval = 5f;
+                skillDef.baseRechargeInterval = 6f;
 
                 skillDef.rechargeStock = 1;
                 skillDef.requiredStock = 1;
@@ -503,7 +515,7 @@ namespace UmbralMithrix
 
                 GenericSkill skill = mithrixGlass.AddComponent<GenericSkill>();
                 skill._skillFamily = newFamily;
-                mithrixGlass.GetComponent<SkillLocator>().secondary = skill;
+                mithrixGlass.GetComponent<SkillLocator>().special = skill;
 
                 ContentAddition.AddSkillFamily(newFamily);
                 ContentAddition.AddSkillDef(skillDef);

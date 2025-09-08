@@ -29,14 +29,16 @@ namespace UmbralMithrix
             stopwatch += Time.deltaTime;
             if (stopwatch < interval)
                 return;
-
+            playerBodies.Clear();
             foreach (CharacterMaster cm in CharacterMaster.readOnlyInstancesList)
             {
                 if (cm.teamIndex == TeamIndex.Player)
                 {
                     CharacterBody cb = cm.GetBody();
                     if (cb && cb.isPlayerControlled)
+                    {
                         playerBodies.Add(cb);
+                    }
                 }
             }
 
