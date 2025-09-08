@@ -1,3 +1,11 @@
+`2.5.11`
+
+- Removes the large glowy particles from majority of the fight, only show up in P4 now for less visual clutter
+- Glass clones now spawn their tracking orb while standing still and playing a kneel animation
+- Glass clones now live longer (6s -> 10s) *should give more incentive to attack clones and for them to feel less spammy*
+- Fixes glass clones jumping on death in P1
+- Internal code change for tracking orb to improve performance
+
 `2.5.10`
 
 - Fixes potential incompat with other mod hooks (namely RiskofResource's Gauntlet mod)

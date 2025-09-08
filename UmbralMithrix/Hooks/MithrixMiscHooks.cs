@@ -18,7 +18,7 @@ namespace UmbralMithrix
 
         private void SkyLeapDeathState_OnEnter(On.EntityStates.BrotherMonster.SkyLeapDeathState.orig_OnEnter orig, SkyLeapDeathState self)
         {
-            if (self.characterBody.name == "BrotherGlassBody(Clone)" && PhaseCounter.instance && PhaseCounter.instance.phase == 2)
+            if (self.characterBody.name == "BrotherGlassBody(Clone)")
             {
                 self.DestroyModel();
 

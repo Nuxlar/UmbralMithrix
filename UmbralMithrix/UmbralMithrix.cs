@@ -29,7 +29,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.10";
+        public const string PluginVersion = "2.5.11";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -83,6 +83,7 @@ namespace UmbralMithrix
         public static GameObject rightUltLine;
         public static GameObject staticUltLine;
         public static GameObject shardProjectile;
+        public static GameObject cloneTrackingOrb;
         public static Material preBossMat;
         public static Material arenaWallMat;
         public static Material stealAuraMat;
@@ -133,9 +134,9 @@ namespace UmbralMithrix
 
         private void ChangeVanillaEntityStateValues()
         {
-            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother_EntityStates_BrotherMonster.FistSlam_asset, "healthCostFraction", "0");
-            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother_EntityStates_BrotherMonster.SpellChannelEnterState_asset, "duration", "3");
-            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother_EntityStates_BrotherMonster.SpellChannelState_asset, "maxDuration", "5");
+            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_FistSlam_asset, "healthCostFraction", "0");
+            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_SpellChannelEnterState_asset, "duration", "3");
+            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_SpellChannelState_asset, "maxDuration", "5");
         }
 
         public static void ArenaSetup()
@@ -202,6 +203,8 @@ namespace UmbralMithrix
             ContentAddition.AddEntityState<HoldUmbralLeap>(out _);
             ContentAddition.AddEntityState<ExitUmbralLeap>(out _);
             ContentAddition.AddEntityState<UmbralBash>(out _);
+            ContentAddition.AddEntityState<GlassOrbAttack>(out _);
+            ContentAddition.AddEntityState<GlassOrbAttackExit>(out _);
         }
 
         private void CreateDoppelItem()
@@ -240,7 +243,7 @@ namespace UmbralMithrix
 
         private void SetupVoidling()
         {
-            AssetReferenceT<GameObject> voidlingRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_DLC1_VoidRaidCrab.MiniVoidRaidCrabBodyPhase3_prefab);
+            AssetReferenceT<GameObject> voidlingRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.MiniVoidRaidCrabBodyPhase3_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(voidlingRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
@@ -279,7 +282,14 @@ namespace UmbralMithrix
 
         private void CloneAssets()
         {
-            AssetReferenceT<GameObject> leftUltLineRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherUltLineProjectileRotateLeft_prefab);
+            AssetReferenceT<GameObject> trackingOrbRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_LunarWisp.LunarWispTrackingBomb_prefab);
+            AssetAsyncReferenceManager<GameObject>.LoadAsset(trackingOrbRef).Completed += (x) =>
+            {
+                cloneTrackingOrb = PrefabAPI.InstantiateClone(x.Result, "UmbralTrackingOrb");
+                cloneTrackingOrb.AddComponent<OrbDelayController>();
+                ContentAddition.AddProjectile(cloneTrackingOrb);
+            };
+            AssetReferenceT<GameObject> leftUltLineRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherUltLineProjectileRotateLeft_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(leftUltLineRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
@@ -296,7 +306,7 @@ namespace UmbralMithrix
                 leftP4Rotate.fastRotationSpeed = 10f;
                 leftP4Rotate.slowRotationSpeed = 10f;
             };
-            AssetReferenceT<GameObject> rightUltLineRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherUltLineProjectileRotateRight_prefab);
+            AssetReferenceT<GameObject> rightUltLineRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherUltLineProjectileRotateRight_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(rightUltLineRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
@@ -311,7 +321,7 @@ namespace UmbralMithrix
                 rightP4Rotate.fastRotationSpeed = 10f;
                 rightP4Rotate.slowRotationSpeed = 10f;
             };
-            AssetReferenceT<GameObject> bodyP3Ref = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherHurtBody_prefab);
+            AssetReferenceT<GameObject> bodyP3Ref = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherHurtBody_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(bodyP3Ref).Completed += (x) =>
             {
                 GameObject result = x.Result;
@@ -334,7 +344,7 @@ namespace UmbralMithrix
                 hurtBody.baseDamage = ModConfig.basedamage.Value;
                 hurtBody.levelDamage = ModConfig.leveldamage.Value;
             };
-            AssetReferenceT<GameObject> masterP3Ref = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherHurtMaster_prefab);
+            AssetReferenceT<GameObject> masterP3Ref = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherHurtMaster_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(masterP3Ref).Completed += (x) =>
             {
                 GameObject result = x.Result;
@@ -350,26 +360,26 @@ namespace UmbralMithrix
 
                 ContentAddition.AddMaster(mithrixHurtP3Master);
             };
-            AssetReferenceT<GameObject> practiceFireRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_bazaar_Bazaar.Light_prefab);
+            AssetReferenceT<GameObject> practiceFireRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_bazaar.Bazaar_Light_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(practiceFireRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
                 practiceFire = PrefabAPI.InstantiateClone(result.transform.Find("FireLODLevel").gameObject, "PracticeFire").transform;
             };
-            AssetReferenceT<GameObject> lunarMissileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_EliteLunar.LunarMissileProjectile_prefab);
+            AssetReferenceT<GameObject> lunarMissileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_EliteLunar.LunarMissileProjectile_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(lunarMissileRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
                 lunarMissile = PrefabAPI.InstantiateClone(result, "UmbralLunarMissile", false);
             };
-            AssetReferenceT<GameObject> indicatorRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Vagrant.VagrantNovaAreaIndicator_prefab);
+            AssetReferenceT<GameObject> indicatorRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Vagrant.VagrantNovaAreaIndicator_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(indicatorRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
                 leapIndicatorPrefab = PrefabAPI.InstantiateClone(result, "UmbralLeapIndicator");
                 leapIndicatorPrefab.AddComponent<NetworkIdentity>();
             };
-            AssetReferenceT<GameObject> waveRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherSunderWave_prefab);
+            AssetReferenceT<GameObject> waveRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherSunderWave_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(waveRef).Completed += (x) =>
             {
                 GameObject result = x.Result;
@@ -379,25 +389,25 @@ namespace UmbralMithrix
 
         private void LoadAssets()
         {
-            AssetReferenceT<GameObject> tpRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Junk.YoungTeleporter_prefab);
+            AssetReferenceT<GameObject> tpRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Junk.YoungTeleporter_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(tpRef).Completed += (x) => youngTeleporter = x.Result;
-            AssetReferenceT<GameObject> tetherRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_DLC1_EliteEarth.AffixEarthTetherVFX_prefab);
+            AssetReferenceT<GameObject> tetherRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_EliteEarth.AffixEarthTetherVFX_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(tetherRef).Completed += (x) => tether = x.Result;
-            AssetReferenceT<GameObject> implodeRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Vagrant.VagrantNovaExplosion_prefab);
+            AssetReferenceT<GameObject> implodeRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Vagrant.VagrantNovaExplosion_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(implodeRef).Completed += (x) => implodeEffect = x.Result;
-            AssetReferenceT<GameObject> slamImpactRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherSlamImpact_prefab);
+            AssetReferenceT<GameObject> slamImpactRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherSlamImpact_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(slamImpactRef).Completed += (x) => umbralSlamImpact = x.Result;
-            AssetReferenceT<GameObject> slamProjectileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother_BrotherSunderWave.Energized_prefab);
+            AssetReferenceT<GameObject> slamProjectileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherSunderWave__Energized_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(slamProjectileRef).Completed += (x) => umbralSlamProjectile = x.Result;
-            AssetReferenceT<GameObject> slamPillarRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherFirePillar_prefab);
+            AssetReferenceT<GameObject> slamPillarRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherFirePillar_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(slamPillarRef).Completed += (x) => umbralSlamPillar = x.Result;
-            AssetReferenceT<GameObject> slamHitRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Huntress.OmniImpactVFXHuntress_prefab);
+            AssetReferenceT<GameObject> slamHitRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Huntress.OmniImpactVFXHuntress_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(slamHitRef).Completed += (x) => umbralSlamHitEffect = x.Result;
-            AssetReferenceT<GameObject> swingEffectRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother_BrotherSwing1.Kickup_prefab);
+            AssetReferenceT<GameObject> swingEffectRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherSwing1__Kickup_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(swingEffectRef).Completed += (x) => umbralSwingEffect = x.Result;
-            AssetReferenceT<GameObject> ultFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.ItemStealEndMuzzleflash_prefab);
+            AssetReferenceT<GameObject> ultFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.ItemStealEndMuzzleflash_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(ultFlashRef).Completed += (x) => umbralUltMuzzleFlash = x.Result;
-            AssetReferenceT<GameObject> masterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherMaster_prefab);
+            AssetReferenceT<GameObject> masterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherMaster_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(masterRef).Completed += (x) =>
             {
                 GameObject mithrixMaster = x.Result;
@@ -406,7 +416,7 @@ namespace UmbralMithrix
                 AISkillDriver fireShards = mithrixMaster.GetComponents<AISkillDriver>().Where(x => x.customName == "Sprint and FireLunarShards").First();
                 fireShards.minDistance = 20f;
             };
-            AssetReferenceT<GameObject> bodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.BrotherBody_prefab);
+            AssetReferenceT<GameObject> bodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherBody_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(bodyRef).Completed += (x) =>
             {
                 mithrix = x.Result;
@@ -443,7 +453,7 @@ namespace UmbralMithrix
                 SkillDef skillDef4 = skillLocator.special.skillFamily.variants[0].skillDef;
                 skillDef4.baseRechargeInterval = ModConfig.SpecialCD.Value;
             };
-            AssetReferenceT<GameObject> glassBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Junk_BrotherGlass.BrotherGlassBody_prefab);
+            AssetReferenceT<GameObject> glassBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Junk_BrotherGlass.BrotherGlassBody_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(glassBodyRef).Completed += (x) =>
             {
                 mithrixGlass = x.Result;
@@ -461,6 +471,43 @@ namespace UmbralMithrix
                 characterMotor.airControl = ModConfig.aircontrol.Value;
                 characterDirection.turnSpeed = ModConfig.turningspeed.Value;
 
+                SkillDef skillDef = ScriptableObject.CreateInstance<SkillDef>();
+                skillDef.skillName = "UmbralOrb";
+                (skillDef as ScriptableObject).name = "UmbralOrb";
+
+                skillDef.activationState = new SerializableEntityStateType(typeof(GlassOrbAttack));
+                skillDef.activationStateMachineName = "Body";
+                skillDef.interruptPriority = InterruptPriority.Death;
+
+                skillDef.baseMaxStock = 1;
+                skillDef.baseRechargeInterval = 5f;
+
+                skillDef.rechargeStock = 1;
+                skillDef.requiredStock = 1;
+                skillDef.stockToConsume = 1;
+
+                skillDef.dontAllowPastMaxStocks = true;
+                skillDef.beginSkillCooldownOnSkillEnd = false;
+                skillDef.canceledFromSprinting = true;
+                skillDef.forceSprintDuringState = false;
+                skillDef.fullRestockOnAssign = true;
+                skillDef.resetCooldownTimerOnUse = true;
+                skillDef.isCombatSkill = true;
+                skillDef.mustKeyPress = false;
+                skillDef.cancelSprintingOnActivation = true;
+
+                SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
+                (newFamily as ScriptableObject).name = "UmbralGlassPrimaryFamily";
+                ;
+                newFamily.variants = new SkillFamily.Variant[1] { new SkillFamily.Variant { skillDef = skillDef } };
+
+                GenericSkill skill = mithrixGlass.AddComponent<GenericSkill>();
+                skill._skillFamily = newFamily;
+                mithrixGlass.GetComponent<SkillLocator>().secondary = skill;
+
+                ContentAddition.AddSkillFamily(newFamily);
+                ContentAddition.AddSkillDef(skillDef);
+
                 Transform modelTransform = null;
                 if (mithrixGlass.TryGetComponent(out ModelLocator modelLocator))
                 {
@@ -470,7 +517,7 @@ namespace UmbralMithrix
                 if (modelTransform)
                 {
                     SkinDef originalSkin = Addressables.LoadAssetAsync<SkinDef>("RoR2/Base/Brother/skinBrotherBodyDefault.asset").WaitForCompletion();
-                    //  SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
+                    //  SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
 
                     ModelSkinController modelSkinController = modelTransform.gameObject.EnsureComponent<ModelSkinController>();
                     int replacementSkinIndex = Array.IndexOf(modelSkinController.skins, originalSkin);
@@ -526,7 +573,7 @@ namespace UmbralMithrix
                                 case "BrotherHammerConcrete":
                                 case "BrotherBodyMesh":
                                     rendererInfo.defaultMaterial = null;
-                                    rendererInfo.defaultMaterialAddress = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.maBrotherGlassOverlay_mat);
+                                    rendererInfo.defaultMaterialAddress = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.maBrotherGlassOverlay_mat);
                                     break;
                             }
 
@@ -645,10 +692,10 @@ namespace UmbralMithrix
                     }
 
                     PersistentOverlayController overlayController = modelTransform.gameObject.EnsureComponent<PersistentOverlayController>();
-                    overlayController.OverlayMaterialReference = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherGlassDistortion_mat);
+                    overlayController.OverlayMaterialReference = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.matBrotherGlassDistortion_mat);
                 }
             };
-            AssetReferenceT<GameObject> shardRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.LunarShardProjectile_prefab);
+            AssetReferenceT<GameObject> shardRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.LunarShardProjectile_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(shardRef).Completed += (x) =>
             {
                 shardProjectile = x.Result;
@@ -659,34 +706,34 @@ namespace UmbralMithrix
                 component7.allowTargetLoss = true;
             };
 
-            AssetReferenceT<GameObject> crystalRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_WeeklyRun.TimeCrystalBody_prefab);
+            AssetReferenceT<GameObject> crystalRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_WeeklyRun.TimeCrystalBody_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(crystalRef).Completed += (x) =>
             {
                 GameObject crystal = x.Result;
                 timeCrystal = PrefabAPI.InstantiateClone(crystal, "UmbralCrystal");
                 timeCrystal.AddComponent<ArbitraryCrystalComponent>();
             };
-            AssetReferenceT<SpawnCard> mithrixCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.cscBrother_asset);
+            AssetReferenceT<SpawnCard> mithrixCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.cscBrother_asset);
             AssetAsyncReferenceManager<SpawnCard>.LoadAsset(mithrixCardRef).Completed += (x) => mithrixCard = x.Result;
-            AssetReferenceT<SpawnCard> mithrixHurtCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.cscBrotherHurt_asset);
+            AssetReferenceT<SpawnCard> mithrixHurtCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.cscBrotherHurt_asset);
             AssetAsyncReferenceManager<SpawnCard>.LoadAsset(mithrixHurtCardRef).Completed += (x) => mithrixHurtCard = x.Result;
-            AssetReferenceT<SpawnCard> glassCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.RoR2_Junk_BrotherGlass.cscBrotherGlass_asset);
+            AssetReferenceT<SpawnCard> glassCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Junk_BrotherGlass.cscBrotherGlass_asset);
             AssetAsyncReferenceManager<SpawnCard>.LoadAsset(glassCardRef).Completed += (x) => mithrixGlassCard = x.Result;
 
-            AssetReferenceT<Material> bossMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherPreBossSphere_mat);
+            AssetReferenceT<Material> bossMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.matBrotherPreBossSphere_mat);
             AssetAsyncReferenceManager<Material>.LoadAsset(bossMatRef).Completed += (x) => preBossMat = x.Result;
-            AssetReferenceT<Material> arenaWallMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_moon.matMoonArenaWall_mat);
+            AssetReferenceT<Material> arenaWallMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_moon.matMoonArenaWall_mat);
             AssetAsyncReferenceManager<Material>.LoadAsset(arenaWallMatRef).Completed += (x) => arenaWallMat = x.Result;
-            AssetReferenceT<Material> stealAuraMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.matBrotherStealAura_mat);
+            AssetReferenceT<Material> stealAuraMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.matBrotherStealAura_mat);
             AssetAsyncReferenceManager<Material>.LoadAsset(stealAuraMatRef).Completed += (x) => stealAuraMat = x.Result;
-            AssetReferenceT<Material> moonBridgeMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_moon.matMoonBridge_mat);
+            AssetReferenceT<Material> moonBridgeMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_moon.matMoonBridge_mat);
             AssetAsyncReferenceManager<Material>.LoadAsset(moonBridgeMatRef).Completed += (x) => moonMat = x.Result;
-            AssetReferenceT<Material> doppelMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_InvadingDoppelganger.matDoppelganger_mat);
+            AssetReferenceT<Material> doppelMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_InvadingDoppelganger.matDoppelganger_mat);
             AssetAsyncReferenceManager<Material>.LoadAsset(doppelMatRef).Completed += (x) => doppelMat = x.Result;
-            AssetReferenceT<NetworkSoundEventDef> slamSoundRef = new AssetReferenceT<NetworkSoundEventDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Croco.nseAcridBiteHit_asset);
+            AssetReferenceT<NetworkSoundEventDef> slamSoundRef = new AssetReferenceT<NetworkSoundEventDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Croco.nseAcridBiteHit_asset);
             AssetAsyncReferenceManager<NetworkSoundEventDef>.LoadAsset(slamSoundRef).Completed += (x) => umbralSlamHitSound = x.Result;
 
-            AssetReferenceT<SkillDef> fireShardSkillRef = new AssetReferenceT<SkillDef>(RoR2BepInExPack.GameAssetPaths.RoR2_Base_Brother.FireLunarShards_asset);
+            AssetReferenceT<SkillDef> fireShardSkillRef = new AssetReferenceT<SkillDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.FireLunarShards_asset);
             AssetAsyncReferenceManager<SkillDef>.LoadAsset(fireShardSkillRef).Completed += (x) =>
             {
                 SkillDef fireLunarShardsDef = x.Result;

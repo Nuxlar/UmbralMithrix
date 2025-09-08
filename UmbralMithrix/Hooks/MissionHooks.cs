@@ -22,18 +22,6 @@ namespace UmbralMithrix
         private void Phase1OnEnter(On.EntityStates.Missions.BrotherEncounter.Phase1.orig_OnEnter orig, Phase1 self)
         {
             UmbralMithrix.mithrix.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(ThroneSpawnState));
-
-            GameObject escapeSequenceController = GameObject.Find("EscapeSequenceController");
-            if (escapeSequenceController)
-            {
-                Transform megaGlowsParticles = escapeSequenceController.transform.Find("EscapeSequenceObjects/Mega Glows");
-                if (megaGlowsParticles)
-                {
-                    GameObject arenaMegaGlowsParticles = GameObject.Instantiate<GameObject>(megaGlowsParticles.gameObject, new Vector3(-88.5f, 491.5f, -0.3f), Quaternion.Euler(270f, 0f, 0f));
-                    arenaMegaGlowsParticles.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                }
-            }
-
             orig(self);
         }
 
@@ -52,6 +40,16 @@ namespace UmbralMithrix
 
         private void Phase4OnEnter(On.EntityStates.Missions.BrotherEncounter.Phase4.orig_OnEnter orig, Phase4 self)
         {
+            GameObject escapeSequenceController = GameObject.Find("EscapeSequenceController");
+            if (escapeSequenceController)
+            {
+                Transform megaGlowsParticles = escapeSequenceController.transform.Find("EscapeSequenceObjects/Mega Glows");
+                if (megaGlowsParticles)
+                {
+                    GameObject arenaMegaGlowsParticles = GameObject.Instantiate<GameObject>(megaGlowsParticles.gameObject, new Vector3(-88.5f, 491.5f, -0.3f), Quaternion.Euler(270f, 0f, 0f));
+                    arenaMegaGlowsParticles.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                }
+            }
             GameObject gameObject = GameObject.Instantiate(UmbralMithrix.voidling, new Vector3(-88.5f, 520f, -0.3f), Quaternion.identity);
             gameObject.AddComponent<DeathZoneController>();
             gameObject.GetComponent<TeamComponent>().teamIndex = TeamIndex.Monster;

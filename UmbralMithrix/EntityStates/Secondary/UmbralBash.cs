@@ -3,7 +3,6 @@ using UnityEngine;
 using EntityStates;
 using EntityStates.BrotherMonster;
 using RoR2.Projectile;
-using EntityStates.LunarWisp;
 
 namespace UmbralMithrix.EntityStates;
 
@@ -55,10 +54,6 @@ public class UmbralBash : BasicMeleeAttack
                     ProjectileManager.instance.FireProjectile(WeaponSlam.waveProjectilePrefab, footPosition, Util.QuaternionSafeLookRotation(forward), this.gameObject, this.characterBody.damage * WeaponSlam.waveProjectileDamageCoefficient, WeaponSlam.waveProjectileForce, Util.CheckRoll(this.characterBody.crit, this.characterBody.master));
                 }
             }
-            else
-            {
-                ProjectileManager.instance.FireProjectile(SeekingBomb.projectilePrefab, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), this.gameObject, this.characterBody.damage * (SeekingBomb.bombDamageCoefficient * 0.75f), SeekingBomb.bombForce, Util.CheckRoll(this.critStat, this.characterBody.master), speedOverride: 0.0f);
-            }
         }
         AimAnimator aimAnimator = this.GetAimAnimator();
         if ((bool)aimAnimator)
@@ -83,17 +78,6 @@ public class UmbralBash : BasicMeleeAttack
             modelChild.gameObject.SetActive(false);
         this.PlayCrossfade("FullBody Override", "BufferEmpty", 0.1f);
         base.OnExit();
-
-        if (this.characterBody.name == "BrotherGlassBody(Clone)")
-        {
-            foreach (ProjectileController projectileController in InstanceTracker.GetInstancesList<ProjectileController>())
-            {
-                if (projectileController.name == "LunarWispTrackingBomb(Clone)" && projectileController.TryGetComponent(out ProjectileSimple projectileSimple))
-                {
-                    projectileSimple.desiredForwardSpeed = 50f;
-                }
-            }
-        }
     }
 
     public override InterruptPriority GetMinimumInterruptPriority()
