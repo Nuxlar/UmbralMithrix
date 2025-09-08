@@ -2,6 +2,8 @@
 
 - Fixes error spam if survivor respawns during the fight
 - Glass clone orb spawn is now a separate skill and they can hammer swipe again
+- Shortened glass clone orb summon time (3s -> 2s)
+- Shortened glass clone orb exit time (2s -> 1s)
 
 `2.5.11`
 
