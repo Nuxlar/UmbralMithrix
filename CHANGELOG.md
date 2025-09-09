@@ -1,3 +1,7 @@
+`2.5.13`
+
+- Fixes glass clone orb launch delay not matching the new summon time (3s -> 2s)
+
 `2.5.12`
 
 - Fixes error spam if survivor respawns during the fight

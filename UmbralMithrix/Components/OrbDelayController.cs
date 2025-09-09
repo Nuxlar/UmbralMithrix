@@ -5,7 +5,7 @@ namespace UmbralMithrix
 {
     public class OrbDelayController : MonoBehaviour
     {
-        private float delay = 3f;
+        private float delay = 2f;
         private float stopwatch = 0f;
         private ProjectileSimple projectileSimple;
 
