@@ -203,6 +203,14 @@ namespace UmbralMithrix
             if (!PhaseCounter.instance)
                 return;
 
+            if (Run.instance && Run.instance.nameToken == "Judgement")
+            {
+                if (body.isPlayerControlled)
+                {
+                    body.baseMoveSpeed *= 1.5f;
+                }
+            }
+
             if (body.name == "BrotherHurtBodyP3(Clone)")
             {
                 if (ModConfig.purpleMithrix.Value)

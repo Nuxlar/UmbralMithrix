@@ -1,3 +1,8 @@
+`2.5.14`
+
+- Fixes move speed bonus not being applied in Judgement
+- Increases Judgement speed bonus (25% -> 50%)
+
 `2.5.13`
 
 - Fixes glass clone orb launch delay not matching the new summon time (3s -> 2s)

@@ -11,6 +11,7 @@ Major reworks to the fight, a new trophy item, and a practice mode. When you spa
 - Base stats are balanced around "vanilla" E8, increase stats or tweak attack configs to add difficulty based on your own gameplay/needs.
 - "Practice Mode" is activated by interacting with the shrine to your left when you spawn in on the moon. It gives you infinite revives during the fight, Phase 4 won't give you the speed buff and pizza attacks may not spawn if you die during this phase with practice mode.
 - The "Core of the Collective" item dropped after the fight is completed does nothing, it's there to track victories against Umbral (in the logbook) and act as a "trophy".
+- You gain a +50% base move speed bonus if playing the modded Judgement game mode
 
 ### Practice Mode
 
