@@ -1,5 +1,4 @@
 using EntityStates;
-using EntityStates.BrotherMonster;
 using EntityStates.BrotherMonster.Weapon;
 using EntityStates.Destructible;
 using Mono.Cecil.Cil;
@@ -22,7 +21,6 @@ namespace UmbralMithrix
             IL.RoR2.CharacterAI.BaseAI.FindEnemyHurtBox += TargetOnlyPlayers;
             IL.RoR2.CharacterBody.UpdateAllTemporaryVisualEffects += AddUmbralParticles;
             IL.RoR2.CharacterModel.UpdateOverlays += AddUmbralOverlay;
-            IL.RoR2.CharacterModel.UpdateOverlays += AddUmbralOverlayCrystal;
             On.RoR2.CharacterAI.BaseAI.FindEnemyHurtBox += ChangeP3CloneTargeting;
             On.RoR2.CharacterMaster.OnBodyDeath += CharacterMaster_OnBodyDeath;
             On.RoR2.PurchaseInteraction.OnInteractionBegin += PurchaseInteraction_OnInteractionBegin;
@@ -121,7 +119,7 @@ namespace UmbralMithrix
             c.Emit(OpCodes.Ldarg_0);
             c.EmitDelegate<Func<int, CharacterBody, int>>((vengeanceCount, self) =>
             {
-                if (self.name.Contains("Brother") && self.inventory && self.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0 && ModConfig.purpleMithrix.Value)
+                if (self.name.Contains("Brother") && self.inventory && self.inventory.GetItemCountPermanent(UmbralMithrix.UmbralItem) > 0 && ModConfig.purpleMithrix.Value)
                     vengeanceCount++;
                 return vengeanceCount;
             });
@@ -130,36 +128,37 @@ namespace UmbralMithrix
         private void AddUmbralOverlay(ILContext il)
         {
             ILCursor c = new ILCursor(il);
-            c.GotoNext(
-                 x => x.MatchLdsfld(typeof(RoR2Content.Items), "InvadingDoppelganger")
-                );
-            c.Index += 2;
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Func<int, CharacterModel, int>>((vengeanceCount, self) =>
+
+            if (!c.TryFindNext(out ILCursor[] foundCursors,
+                               x => x.MatchLdsfld(typeof(RoR2Content.Items), nameof(RoR2Content.Items.InvadingDoppelganger)),
+                               x => x.MatchCallOrCallvirt<Inventory>(nameof(Inventory.GetItemCountEffective))))
             {
-                if (self.body.name.Contains("Brother") && self.body.inventory && self.body.inventory.GetItemCount(UmbralMithrix.UmbralItem) > 0 && ModConfig.purpleMithrix.Value)
+                Log.Error("Failed to find patch location");
+                return;
+            }
+
+            c.Goto(foundCursors[1].Next, MoveType.After); // call Inventory.GetItemCountEffective
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate(getDoppelGangerCount);
+
+            static int getDoppelGangerCount(int doppelgangerCount, CharacterModel characterModel)
+            {
+                if (characterModel && characterModel.body)
                 {
-                    vengeanceCount++;
+                    if (characterModel.body.name.Contains("Brother") && characterModel.body.inventory && characterModel.body.inventory.GetItemCountPermanent(UmbralMithrix.UmbralItem) > 0 && ModConfig.purpleMithrix.Value)
+                    {
+                        doppelgangerCount++;
+                    }
+
+                    if (characterModel.body.GetComponent<ArbitraryCrystalComponent>())
+                    {
+                        doppelgangerCount++;
+                    }
                 }
 
-                return vengeanceCount;
-            });
-        }
-
-        private void AddUmbralOverlayCrystal(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-            c.GotoNext(x => x.MatchLdsfld(typeof(RoR2Content.Items), "InvadingDoppelganger"));
-
-            c.Index -= 1;
-            c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Func<bool, CharacterModel, bool>>((hasInventory, self) =>
-            {
-                if (self.body.gameObject.GetComponent<ArbitraryCrystalComponent>())
-                    return true;
-
-                return hasInventory;
-            });
+                return doppelgangerCount;
+            }
         }
 
         private void ThresholdCheck(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
@@ -215,18 +214,18 @@ namespace UmbralMithrix
             {
                 if (ModConfig.purpleMithrix.Value)
                 {
-                    self.inventory.GiveItem(UmbralMithrix.UmbralItem);
+                    self.inventory.GiveItemPermanent(UmbralMithrix.UmbralItem);
                 }
                 if (UmbralMissionController.instance)
                 {
                     UmbralMissionController.instance.currentPhaseBody = body;
                 }
-                self.inventory.GiveItem(RoR2Content.Items.AdaptiveArmor);
+                self.inventory.GiveItemPermanent(RoR2Content.Items.AdaptiveArmor);
             }
 
             if ((body.name == "BrotherBody(Clone)") && ModConfig.purpleMithrix.Value)
             {
-                self.inventory.GiveItem(UmbralMithrix.UmbralItem);
+                self.inventory.GiveItemPermanent(UmbralMithrix.UmbralItem);
             }
 
             if (body.name == "BrotherBody(Clone)")
@@ -269,9 +268,9 @@ namespace UmbralMithrix
                 {
                     body.levelMoveSpeed = 0;
                     body.baseMoveSpeed = 0;
-                    body.inventory.GiveItem(UmbralMithrix.UmbralItem);
+                    body.inventory.GiveItemPermanent(UmbralMithrix.UmbralItem);
                     body.AddBuff(RoR2Content.Buffs.Immune);
-                    body.inventory.GiveItem(RoR2Content.Items.HealthDecay, 40);
+                    body.inventory.GiveItemPermanent(RoR2Content.Items.HealthDecay, 40);
                     body.GetComponent<SkillLocator>().primary = new GenericSkill();
                     body.GetComponent<SkillLocator>().secondary = new GenericSkill();
                 }

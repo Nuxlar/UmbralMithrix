@@ -93,9 +93,6 @@ namespace UmbralMithrix
                 }
             }
 
-            self.phaseBossGroup.bestObservedName = "Umbral Mithrix";
-            self.phaseBossGroup.bestObservedSubtitle = "<sprite name=\"CloudLeft\"> The Collective <sprite name=\"CloudRight\">";
-
             ScriptedCombatEncounter.SpawnInfo spawnInfo1;
             if (PhaseCounter.instance.phase == 2)
             {

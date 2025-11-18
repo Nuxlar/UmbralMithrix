@@ -1,6 +1,8 @@
 using BepInEx;
+using BepInEx.Bootstrap;
 using EntityStates;
 using EntityStates.BrotherMonster;
+using HG;
 using R2API;
 using Rewired.ComponentControls.Effects;
 using RoR2;
@@ -8,22 +10,22 @@ using RoR2.CharacterAI;
 using RoR2.ContentManagement;
 using RoR2.Projectile;
 using RoR2.Skills;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using UmbralMithrix.Components;
 using UmbralMithrix.EntityStates;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
-using BepInEx.Bootstrap;
-using HG;
-using System;
-using UmbralMithrix.Components;
 
 namespace UmbralMithrix
 {
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(R2API.ContentManagement.R2APIContentManager.PluginGUID)]
     [BepInDependency(R2API.PrefabAPI.PluginGUID)]
+    [BepInDependency(R2API.LanguageAPI.PluginGUID)]
+    [BepInDependency(RiskOfOptions.PluginInfo.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class UmbralMithrix : BaseUnityPlugin
     {
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
@@ -329,6 +331,9 @@ namespace UmbralMithrix
                 mithrixHurtP3.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(StaggerEnter));
                 CharacterBody characterBody = mithrixHurtP3.GetComponent<CharacterBody>();
 
+                characterBody.baseNameToken = "UMBRALMITHRIX_UMBRAL_BODY_NAME";
+                characterBody.subtitleNameToken = "UMBRALMITHRIX_UMBRAL_BODY_SUBTITLE";
+
                 characterBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes;
                 characterBody.baseMaxHealth = ModConfig.basehealth.Value;
                 characterBody.levelMaxHealth = ModConfig.levelhealth.Value;
@@ -340,6 +345,9 @@ namespace UmbralMithrix
                 mithrixHurt = x.Result;
                 mithrixHurt.AddComponent<P4Controller>();
                 CharacterBody hurtBody = mithrixHurt.GetComponent<CharacterBody>();
+
+                hurtBody.baseNameToken = "UMBRALMITHRIX_UMBRAL_BODY_NAME";
+                hurtBody.subtitleNameToken = "UMBRALMITHRIX_UMBRAL_BODY_SUBTITLE";
 
                 hurtBody.baseDamage = ModConfig.basedamage.Value;
                 hurtBody.levelDamage = ModConfig.leveldamage.Value;
@@ -423,6 +431,9 @@ namespace UmbralMithrix
                 CharacterBody characterBody = mithrix.GetComponent<CharacterBody>();
                 CharacterDirection characterDirection = mithrix.GetComponent<CharacterDirection>();
                 CharacterMotor characterMotor = mithrix.GetComponent<CharacterMotor>();
+
+                characterBody.baseNameToken = "UMBRALMITHRIX_UMBRAL_BODY_NAME";
+                characterBody.subtitleNameToken = "UMBRALMITHRIX_UMBRAL_BODY_SUBTITLE";
 
                 characterBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes;
                 characterBody.baseMaxHealth = ModConfig.basehealth.Value;
@@ -510,7 +521,6 @@ namespace UmbralMithrix
 
                 SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
                 (newFamily as ScriptableObject).name = "UmbralGlassPrimaryFamily";
-                ;
                 newFamily.variants = new SkillFamily.Variant[1] { new SkillFamily.Variant { skillDef = skillDef } };
 
                 GenericSkill skill = mithrixGlass.AddComponent<GenericSkill>();
@@ -520,16 +530,20 @@ namespace UmbralMithrix
                 ContentAddition.AddSkillFamily(newFamily);
                 ContentAddition.AddSkillDef(skillDef);
 
-                Transform modelTransform = null;
-                if (mithrixGlass.TryGetComponent(out ModelLocator modelLocator))
+                // Hack to get around starting a new async operation in the Complete callback not being allowed
+                RoR2Application.onNextUpdate += () =>
                 {
-                    modelTransform = modelLocator.modelTransform;
-                }
+                    Transform modelTransform = null;
+                    if (mithrixGlass && mithrixGlass.TryGetComponent(out ModelLocator modelLocator))
+                    {
+                        modelTransform = modelLocator.modelTransform;
+                    }
 
-                if (modelTransform)
-                {
-                    SkinDef originalSkin = Addressables.LoadAssetAsync<SkinDef>("RoR2/Base/Brother/skinBrotherBodyDefault.asset").WaitForCompletion();
-                    //  SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.skinBrotherBodyDefault_asset)).WaitForCompletion();
+                    if (!modelTransform)
+                        return;
+
+                    AssetReferenceT<SkinDef> originalSkinRef = new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.skinBrotherBodyDefault_asset);
+                    SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(originalSkinRef).WaitForCompletion();
 
                     ModelSkinController modelSkinController = modelTransform.gameObject.EnsureComponent<ModelSkinController>();
                     int replacementSkinIndex = Array.IndexOf(modelSkinController.skins, originalSkin);
@@ -705,7 +719,10 @@ namespace UmbralMithrix
 
                     PersistentOverlayController overlayController = modelTransform.gameObject.EnsureComponent<PersistentOverlayController>();
                     overlayController.OverlayMaterialReference = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.matBrotherGlassDistortion_mat);
-                }
+
+                    skinDefParamsReference.Reset();
+                    AssetAsyncReferenceManager<SkinDef>.UnloadAsset(originalSkinRef);
+                };
             };
             AssetReferenceT<GameObject> shardRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.LunarShardProjectile_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(shardRef).Completed += (x) =>
