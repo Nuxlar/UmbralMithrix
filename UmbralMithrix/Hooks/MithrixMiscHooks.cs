@@ -112,7 +112,7 @@ namespace UmbralMithrix
                 if (!UmbralMissionController.instance.practiceModeEnabled)
                 {
                     Vector3 velocity = (Vector3.up * 40f) + (Vector3.forward * 2f);
-                    PickupDropletController.CreatePickupDroplet(PickupCatalog.FindPickupIndex(UmbralMithrix.UmbralItem.itemIndex), self.characterBody.footPosition + (Vector3.up * 1.5f), velocity);
+                    PickupDropletController.CreatePickupDroplet(new UniquePickup(PickupCatalog.FindPickupIndex(UmbralMithrix.UmbralItem.itemIndex)), self.characterBody.footPosition + (Vector3.up * 1.5f), velocity, false);
                 }
 
                 UmbralMissionController.instance.practiceModeEnabled = false;

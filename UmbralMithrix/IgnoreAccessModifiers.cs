@@ -8,7 +8,7 @@ using System.Security.Permissions;
 // This is done here to allow an explanation of the trick and
 // not in an outside source you could potentially miss.
 
-#pragma warning disable CS0618Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
-#pragma warning restore CS0618Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 [module: UnverifiableCode]
