@@ -1,3 +1,7 @@
+`2.5.15`
+
+- Updated for Alloyed Collective (thanks Gorakh!)
+
 `2.5.14`
 
 - Fixes move speed bonus not being applied in Judgement
