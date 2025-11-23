@@ -87,7 +87,7 @@ public class ChannelUmbralUlt : BaseState
 
             if (PhaseCounter.instance.phase == 3)
             {
-                int count = PlayerCharacterMasterController.instances.Count;
+                int count = playerBodies.Count;
                 int num1 = ModConfig.UltimateWaves.Value;
                 float num2 = 360f / num1;
                 normalized = Vector3.ProjectOnPlane(UnityEngine.Random.onUnitSphere, Vector3.up).normalized;
@@ -95,11 +95,13 @@ public class ChannelUmbralUlt : BaseState
                 if (UnityEngine.Random.value <= 0.5)
                     prefab = UmbralMithrix.rightUltLine;
 
-                PlayerCharacterMasterController instance = PlayerCharacterMasterController.instances[new System.Random().Next(0, count - 1)];
-
+                Vector3 center = playerBodies[Random.Range(0, playerBodies.Count)].footPosition with
+                {
+                    y = 491f
+                };
                 Vector3[] vector3Array = [
-                    new Vector3(instance.body.footPosition.x, this.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(-45f, -15f), 0.0f, UnityEngine.Random.Range(-45f, -15f)),
-                        new Vector3(instance.body.footPosition.x, this.characterBody.footPosition.y, instance.body.footPosition.z) + new Vector3(UnityEngine.Random.Range(15f, 45f), 0.0f, UnityEngine.Random.Range(15f, 45f))
+                    new Vector3(center.x, this.characterBody.footPosition.y, center.z) + new Vector3(UnityEngine.Random.Range(-45f, -15f), 0.0f, UnityEngine.Random.Range(-45f, -15f)),
+                        new Vector3(center.x, this.characterBody.footPosition.y, center.z) + new Vector3(UnityEngine.Random.Range(15f, 45f), 0.0f, UnityEngine.Random.Range(15f, 45f))
                 ];
 
                 for (int index1 = 0; index1 < 2; ++index1)

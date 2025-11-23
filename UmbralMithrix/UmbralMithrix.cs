@@ -31,7 +31,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.15";
+        public const string PluginVersion = "2.5.16";
 
         internal static UmbralMithrix Instance { get; private set; }
 

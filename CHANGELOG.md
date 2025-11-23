@@ -1,3 +1,7 @@
+`2.5.16`
+
+- Fixed phase 3 pizza not spawning in multiplayer
+
 `2.5.15`
 
 - Updated for Alloyed Collective (thanks Gorakh!)
