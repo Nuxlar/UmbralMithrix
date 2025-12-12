@@ -266,13 +266,9 @@ namespace UmbralMithrix
                 }
                 else
                 {
-                    body.levelMoveSpeed = 0;
-                    body.baseMoveSpeed = 0;
                     body.inventory.GiveItemPermanent(UmbralMithrix.UmbralItem);
                     body.AddBuff(RoR2Content.Buffs.Immune);
                     body.inventory.GiveItemPermanent(RoR2Content.Items.HealthDecay, 40);
-                    body.GetComponent<SkillLocator>().primary = new GenericSkill();
-                    body.GetComponent<SkillLocator>().secondary = new GenericSkill();
                 }
             }
         }

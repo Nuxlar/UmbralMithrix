@@ -1,3 +1,8 @@
+`2.5.17`
+
+- Updated packages for latest patch
+- Fixed Phase 4 mithrix ominously sliding away
+
 `2.5.16`
 
 - Fixed phase 3 pizza not spawning in multiplayer

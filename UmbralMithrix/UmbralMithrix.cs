@@ -31,7 +31,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.16";
+        public const string PluginVersion = "2.5.17";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -351,6 +351,12 @@ namespace UmbralMithrix
 
                 hurtBody.baseDamage = ModConfig.basedamage.Value;
                 hurtBody.levelDamage = ModConfig.leveldamage.Value;
+                hurtBody.levelMoveSpeed = 0f;
+                hurtBody.baseMoveSpeed = 0f;
+                hurtBody.baseAcceleration = 0f;
+                hurtBody.mainRootSpeed = 0f;
+                hurtBody.GetComponent<SkillLocator>().primary = new GenericSkill();
+                hurtBody.GetComponent<SkillLocator>().secondary = new GenericSkill();
             };
             AssetReferenceT<GameObject> masterP3Ref = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.BrotherHurtMaster_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(masterP3Ref).Completed += (x) =>
