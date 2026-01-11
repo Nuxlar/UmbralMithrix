@@ -31,7 +31,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.17";
+        public const string PluginVersion = "2.5.18";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -137,8 +137,8 @@ namespace UmbralMithrix
         private void ChangeVanillaEntityStateValues()
         {
             SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_FistSlam_asset, "healthCostFraction", "0");
-            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_SpellChannelEnterState_asset, "duration", "3");
-            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_SpellChannelState_asset, "maxDuration", "5");
+            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_SpellChannelEnterState_asset, "duration", "5");
+            SetVanillaEntityStateField(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.EntityStates_BrotherMonster_SpellChannelState_asset, "stealInterval", "0");
         }
 
         public static void ArenaSetup()
@@ -344,6 +344,9 @@ namespace UmbralMithrix
 
                 mithrixHurt = x.Result;
                 mithrixHurt.AddComponent<P4Controller>();
+
+                GameObject.Destroy(mithrixHurt.GetComponent<CharacterMotor>());
+                GameObject.Destroy(mithrixHurt.GetComponent<Rigidbody>());
                 CharacterBody hurtBody = mithrixHurt.GetComponent<CharacterBody>();
 
                 hurtBody.baseNameToken = "UMBRALMITHRIX_UMBRAL_BODY_NAME";

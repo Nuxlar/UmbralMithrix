@@ -1,3 +1,8 @@
+`2.5.18`
+
+- Fixed Phase 4 sliding (fr this time (i hope))
+- Made Phase 4 item steal instant to account for larger inventories and/or looped runs 
+
 `2.5.17`
 
 - Updated packages for latest patch
