@@ -3,6 +3,7 @@ using BepInEx.Bootstrap;
 using EntityStates;
 using EntityStates.BrotherMonster;
 using HG;
+using KinematicCharacterController;
 using R2API;
 using Rewired.ComponentControls.Effects;
 using RoR2;
@@ -31,7 +32,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.18";
+        public const string PluginVersion = "2.5.19";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -347,6 +348,8 @@ namespace UmbralMithrix
 
                 GameObject.Destroy(mithrixHurt.GetComponent<CharacterMotor>());
                 GameObject.Destroy(mithrixHurt.GetComponent<Rigidbody>());
+                GameObject.Destroy(mithrixHurt.GetComponent<KinematicCharacterMotor>());
+
                 CharacterBody hurtBody = mithrixHurt.GetComponent<CharacterBody>();
 
                 hurtBody.baseNameToken = "UMBRALMITHRIX_UMBRAL_BODY_NAME";
@@ -485,6 +488,8 @@ namespace UmbralMithrix
                         driver.requiredSkill = null;
                 }
             };
+            AssetReferenceT<SkinDef> originalSkinRef = new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.skinBrotherBodyDefault_asset);
+            SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(originalSkinRef).WaitForCompletion();
             AssetReferenceT<GameObject> glassBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Junk_BrotherGlass.BrotherGlassBody_prefab);
             AssetAsyncReferenceManager<GameObject>.LoadAsset(glassBodyRef).Completed += (x) =>
             {
@@ -550,9 +555,6 @@ namespace UmbralMithrix
 
                     if (!modelTransform)
                         return;
-
-                    AssetReferenceT<SkinDef> originalSkinRef = new AssetReferenceT<SkinDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Brother.skinBrotherBodyDefault_asset);
-                    SkinDef originalSkin = AssetAsyncReferenceManager<SkinDef>.LoadAsset(originalSkinRef).WaitForCompletion();
 
                     ModelSkinController modelSkinController = modelTransform.gameObject.EnsureComponent<ModelSkinController>();
                     int replacementSkinIndex = Array.IndexOf(modelSkinController.skins, originalSkin);

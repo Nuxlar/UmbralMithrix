@@ -1,3 +1,10 @@
+`2.5.19`
+
+- Fixes phase 4 immobilizing players
+- Fixes startup null error
+- Reduces Judgement movement speed bonus (50% -> 35%)
+- Removed Herobrine
+
 `2.5.18`
 
 - Fixed Phase 4 sliding (fr this time (i hope))

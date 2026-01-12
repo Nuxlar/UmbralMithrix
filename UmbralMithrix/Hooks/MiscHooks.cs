@@ -206,7 +206,7 @@ namespace UmbralMithrix
             {
                 if (body.isPlayerControlled)
                 {
-                    body.baseMoveSpeed *= 1.5f;
+                    body.baseMoveSpeed *= 1.35f;
                 }
             }
 
