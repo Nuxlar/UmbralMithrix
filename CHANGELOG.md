@@ -1,3 +1,8 @@
+`2.5.20`
+
+- Adds nullcheck to prevent edge case incompats preventing game launch
+- Adds hard incompat with Artifact of the King and RiskyMithrix (mithrix mods should not be stacked to prevent weird bugs/interactions, and no it doesn't make a super difficult mithrix just a very buggy one)
+
 `2.5.19`
 
 - Fixes phase 4 immobilizing players

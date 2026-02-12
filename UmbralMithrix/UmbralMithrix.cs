@@ -27,12 +27,14 @@ namespace UmbralMithrix
     [BepInDependency(R2API.PrefabAPI.PluginGUID)]
     [BepInDependency(R2API.LanguageAPI.PluginGUID)]
     [BepInDependency(RiskOfOptions.PluginInfo.PLUGIN_GUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInIncompatibility("com.Blobface.ArtifactKing")]
+    [BepInIncompatibility("com.RiskyLives.RiskyMithrix")]
     public class UmbralMithrix : BaseUnityPlugin
     {
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.19";
+        public const string PluginVersion = "2.5.20";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -557,6 +559,7 @@ namespace UmbralMithrix
                         return;
 
                     ModelSkinController modelSkinController = modelTransform.gameObject.EnsureComponent<ModelSkinController>();
+                    modelSkinController.skins ??= Array.Empty<SkinDef>();
                     int replacementSkinIndex = Array.IndexOf(modelSkinController.skins, originalSkin);
 
                     SkinDef skinDef = Instantiate(originalSkin);
