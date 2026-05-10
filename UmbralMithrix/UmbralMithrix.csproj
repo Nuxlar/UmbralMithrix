@@ -20,12 +20,12 @@
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.4.1-r.0" GeneratePathProperty="true"/>
-    <PackageReference Include="MMHOOK.RoR2" Version="2025.12.9" NoWarn="NU1701" />
-    <PackageReference Include="RoR2BepInExPack" Version="1.41.0" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="*-*" GeneratePathProperty="true"/>
+    <PackageReference Include="MMHOOK.RoR2" Version="*" NoWarn="NU1701" />
+    <PackageReference Include="RoR2BepInExPack" Version="*" />
     <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" GeneratePathProperty="true" />
     <PackageReference Include="R2API.Core" Version="5.3.0" />
-    <PackageReference Include="R2API.ContentManagement" Version="1.0.10" />
+    <PackageReference Include="R2API.ContentManagement" Version="1.0.11" />
     <PackageReference Include="R2API.Prefab" Version="1.1.1" />
     <PackageReference Include="R2API.Language" Version="1.1.0" />
   </ItemGroup>
@@ -34,7 +34,7 @@
       <Reference Include="RiskOfOptions">
       <HintPath>libs\RiskOfOptions.dll</HintPath>
       <Private>false</Private>
-    </Reference>
+      </Reference>
   </ItemGroup>
 
   <Target Name="BuildTSPackage" AfterTargets="Build">

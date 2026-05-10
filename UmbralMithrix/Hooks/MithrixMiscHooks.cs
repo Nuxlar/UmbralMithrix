@@ -1,3 +1,4 @@
+using System;
 using EntityStates.BrotherMonster;
 using RoR2;
 using RoR2.CharacterAI;
@@ -11,9 +12,23 @@ namespace UmbralMithrix
         public MithrixMiscHooks()
         {
             On.EntityStates.BrotherMonster.SkyLeapDeathState.OnEnter += SkyLeapDeathState_OnEnter;
+            On.EntityStates.BrotherMonster.SpellBaseState.InitItemStealer += PreventTempItemSteal;
             On.EntityStates.BrotherMonster.SpellChannelExitState.OnEnter += SpellChannelExitState_OnEnter;
             On.EntityStates.BrotherMonster.StaggerEnter.OnEnter += StaggerEnter_OnEnter;
             On.EntityStates.BrotherMonster.TrueDeathState.OnEnter += TrueDeathState_OnEnter;
+        }
+
+        private void PreventTempItemSteal(On.EntityStates.BrotherMonster.SpellBaseState.orig_InitItemStealer orig, SpellBaseState self)
+        {
+            if (!NetworkServer.active || !(self.itemStealController == null))
+                return;
+            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(LegacyResourcesAPI.Load<GameObject>("Prefabs/NetworkedObjects/ItemStealController"), self.transform.position, Quaternion.identity);
+            self.itemStealController = gameObject.GetComponent<ItemStealController>();
+            self.itemStealController.itemLendFilter = new Func<ItemIndex, bool>(ItemStealController.BrotherItemFilter);
+            self.itemStealController.itemLendTempFilter = new Func<ItemIndex, bool>(ItemStealController.BrotherItemFilter);
+            gameObject.GetComponent<NetworkedBodyAttachment>().AttachToGameObjectAndSpawn(self.gameObject);
+            self.gameObject.GetComponent<ReturnStolenItemsOnGettingHit>().itemStealController = self.itemStealController;
+            NetworkServer.Spawn(gameObject);
         }
 
         private void SkyLeapDeathState_OnEnter(On.EntityStates.BrotherMonster.SkyLeapDeathState.orig_OnEnter orig, SkyLeapDeathState self)

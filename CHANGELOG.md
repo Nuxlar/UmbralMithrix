@@ -1,3 +1,9 @@
+`2.5.21`
+
+- Fixes Phase 4 being able to use temporary items
+- Finally disables the floating flaming "X" in phase 3
+- Updates internal depedencies
+
 `2.5.20`
 
 - Adds nullcheck to prevent edge case incompats preventing game launch

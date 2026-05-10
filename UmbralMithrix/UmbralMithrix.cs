@@ -34,7 +34,7 @@ namespace UmbralMithrix
         public const string PluginGUID = "com." + PluginAuthor + "." + PluginName;
         public const string PluginAuthor = "Nuxlar";
         public const string PluginName = "UmbralMithrix";
-        public const string PluginVersion = "2.5.20";
+        public const string PluginVersion = "2.5.21";
 
         internal static UmbralMithrix Instance { get; private set; }
 
@@ -333,6 +333,15 @@ namespace UmbralMithrix
                 mithrixHurtP3 = PrefabAPI.InstantiateClone(result, "BrotherHurtBodyP3");
                 mithrixHurtP3.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(StaggerEnter));
                 CharacterBody characterBody = mithrixHurtP3.GetComponent<CharacterBody>();
+
+                if (mithrixHurtP3.TryGetComponent(out ModelLocator modelLocator))
+                {
+                    Transform modelTransform = modelLocator.modelTransform;
+                    if (modelTransform)
+                    {
+                        GameObject.Destroy(modelTransform.GetComponent<EnableWithPhase>());
+                    }
+                }
 
                 characterBody.baseNameToken = "UMBRALMITHRIX_UMBRAL_BODY_NAME";
                 characterBody.subtitleNameToken = "UMBRALMITHRIX_UMBRAL_BODY_SUBTITLE";
